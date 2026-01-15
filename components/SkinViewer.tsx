@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ReactSkinview3d } from 'react-skinview3d';
+import { ReactSkinview3d } from './ReactSkinview3d';
 
 interface SkinViewerProps {
     skinUrl: string;
