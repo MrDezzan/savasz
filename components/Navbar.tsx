@@ -33,11 +33,8 @@ export default function Navbar() {
             <nav className="navbar">
                 <div className="nav-container">
                     <Link href="/" className="nav-logo">
-                        <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                        </svg>
+                        <img src="/assets/logo.png" alt="Sylvaire" className="w-10 h-10 object-contain" />
+                        <span className="font-bold text-xl ml-2">Sylvaire</span>
                     </Link>
                     <div className="nav-links">
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
