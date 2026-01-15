@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { config } from '@/lib/config';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -17,7 +18,7 @@ export default function LoginPage() {
         // Check if already logged in
         const token = localStorage.getItem('sylvaire_token');
         if (token) {
-            fetch('/api/auth/session', {
+            fetch(`${config.apiUrl}/api/auth/session`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             }).then(res => res.json()).then(data => {
                 if (data.success && data.valid) {
@@ -43,7 +44,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/auth/request', {
+            const res = await fetch(`${config.apiUrl}/api/auth/request`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username })
@@ -69,7 +70,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/auth/verify', {
+            const res = await fetch(`${config.apiUrl}/api/auth/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, code })

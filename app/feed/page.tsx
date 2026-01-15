@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { config } from '@/lib/config';
 
 // Define types locally since they might not be in api.ts yet or differ
 interface FeedPost {
@@ -34,7 +35,7 @@ export default function FeedPage() {
 
         if (token && username) {
             try {
-                const res = await fetch('/api/auth/session', {
+                const res = await fetch(`${config.apiUrl}/api/auth/session`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -53,7 +54,7 @@ export default function FeedPage() {
 
     const checkAdminStatus = async (username: string) => {
         try {
-            const res = await fetch(`/api/profile/${username}`);
+            const res = await fetch(`${config.apiUrl}/api/profile/${username}`);
             const data = await res.json();
             if (data.success && data.profile.tags) {
                 if (data.profile.tags.some((t: any) => t.name === 'Админ')) {
@@ -66,7 +67,7 @@ export default function FeedPage() {
     const loadPosts = async (pageNum: number, append = false) => {
         if (!append) setLoading(true);
         try {
-            const res = await fetch(`/api/feed?page=${pageNum}`);
+            const res = await fetch(`${config.apiUrl}/api/feed?page=${pageNum}`);
             const data = await res.json();
 
             if (data.success) {
@@ -95,7 +96,7 @@ export default function FeedPage() {
 
         setSubmitting(true);
         try {
-            const res = await fetch('/api/posts', {
+            const res = await fetch(`${config.apiUrl}/api/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export default function FeedPage() {
         if (!confirm('Удалить эту публикацию?')) return;
 
         try {
-            const res = await fetch(`/api/posts/${postId}`, {
+            const res = await fetch(`${config.apiUrl}/api/posts/${postId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${currentUser.token}` }
             });
@@ -154,7 +155,7 @@ export default function FeedPage() {
         const duration = prompt('Длительность в минутах (пусто = навсегда):');
         const reason = prompt('Причина:');
 
-        fetch('/api/bans', {
+        fetch(`${config.apiUrl}/api/bans`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -173,7 +174,7 @@ export default function FeedPage() {
         const duration = prompt('Длительность в минутах (пусто = навсегда):');
         const reason = prompt('Причина:');
 
-        fetch('/api/mutes', {
+        fetch(`${config.apiUrl}/api/mutes`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
