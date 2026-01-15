@@ -180,3 +180,38 @@ export async function verifyAuth(username: string, code: string): Promise<{ succ
 export async function validateSession(token: string): Promise<{ success: boolean; valid: boolean; username?: string }> {
     return api('/api/auth/session', { token });
 }
+
+// Admin tag management
+export interface TagUpdate {
+    username: string;
+    permission: 'sylvaire.admin' | 'sylvaire.mod' | 'sylvaire.sub';
+    action: 'grant' | 'revoke';
+    duration?: number; // Duration in seconds, null for permanent
+}
+
+export async function updateUserTags(
+    update: TagUpdate,
+    token: string
+): Promise<{ success: boolean; error?: string }> {
+    return api('/api/admin/tags', {
+        method: 'POST',
+        body: JSON.stringify(update),
+        token,
+    });
+}
+
+// Check if user can manage tags
+export async function checkTagManagementPermission(
+    username: string
+): Promise<boolean> {
+    try {
+        const profile = await getProfile(username);
+        if (!profile) return false;
+
+        // IDezzan or admins can manage tags
+        if (username === 'IDezzan') return true;
+        return profile.tags?.some(t => t.name === 'Админ') ?? false;
+    } catch {
+        return false;
+    }
+}

@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getProfile, PlayerProfile, updateDescription } from '@/lib/api';
+import { getProfile, PlayerProfile, updateDescription, updateUserTags, TagUpdate } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import SkinViewer from '@/components/SkinViewer';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
     const params = useParams();
-    const { user } = useAuth();
+    const { user, canManageTags } = useAuth();
     const [profile, setProfile] = useState<PlayerProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,6 +19,10 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [editDesc, setEditDesc] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+
+    // Tag management state
+    const [showTagPanel, setShowTagPanel] = useState(false);
+    const [tagUpdating, setTagUpdating] = useState(false);
 
     useEffect(() => {
         if (!params?.username) return;
@@ -59,6 +63,40 @@ export default function ProfilePage() {
             setIsSaving(false);
         }
     };
+
+    // Функция управления тегами (только для IDezzan/админов)
+    const handleTagUpdate = async (permission: TagUpdate['permission'], action: TagUpdate['action']) => {
+        if (!profile || !user || !canManageTags) return;
+
+        setTagUpdating(true);
+        try {
+            const result = await updateUserTags({
+                username: profile.username,
+                permission,
+                action,
+            }, user.token);
+
+            if (result.success) {
+                toast.success(action === 'grant' ? 'Право выдано' : 'Право отозвано');
+                // Перезагружаем профиль для обновления тегов
+                const updatedProfile = await getProfile(profile.username);
+                if (updatedProfile) {
+                    setProfile(updatedProfile);
+                }
+            } else {
+                toast.error('Ошибка: ' + (result.error || 'Неизвестная ошибка'));
+            }
+        } catch (e) {
+            toast.error('Не удалось обновить права');
+        } finally {
+            setTagUpdating(false);
+        }
+    };
+
+    // Проверка текущих прав пользователя
+    const hasAdminTag = profile?.tags?.some(t => t.name === 'Админ');
+    const hasModTag = profile?.tags?.some(t => t.name === 'Модератор');
+    const hasSubTag = profile?.tags?.some(t => t.name === '+');
 
     const formatDate = (isoString: string) => {
         return new Date(isoString).toLocaleDateString('ru-RU', {
@@ -138,6 +176,121 @@ export default function ProfilePage() {
                                     return <span key={idx} className="tag tag-org">{tag.name}</span>;
                                 })}
                             </div>
+
+                            {/* Панель управления тегами для IDezzan/админов */}
+                            {canManageTags && !isOwnProfile && (
+                                <div className="tag-management-panel" style={{ marginTop: '16px' }}>
+                                    <button
+                                        className="btn btn-sm"
+                                        onClick={() => setShowTagPanel(!showTagPanel)}
+                                        style={{
+                                            background: 'rgba(99, 102, 241, 0.2)',
+                                            border: '1px solid rgba(99, 102, 241, 0.4)',
+                                            color: '#a5b4fc',
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '13px'
+                                        }}
+                                    >
+                                        ⚙ Управление правами
+                                    </button>
+
+                                    {showTagPanel && (
+                                        <div style={{
+                                            marginTop: '12px',
+                                            padding: '16px',
+                                            background: 'rgba(15, 23, 42, 0.8)',
+                                            border: '1px solid rgba(99, 102, 241, 0.3)',
+                                            borderRadius: '12px'
+                                        }}>
+                                            <div style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '12px' }}>
+                                                Управление правами для <strong style={{ color: 'white' }}>{profile.username}</strong>
+                                            </div>
+
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {/* Подписка */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                                                    <span style={{ color: '#ffd700' }}>◆ Подписка</span>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        {hasSubTag ? (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.sub', 'revoke')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#dc2626', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Отозвать
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.sub', 'grant')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#16a34a', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Выдать
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Модератор */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                                                    <span style={{ color: '#3498db' }}>◈ Модератор</span>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        {hasModTag ? (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.mod', 'revoke')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#dc2626', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Отозвать
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.mod', 'grant')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#16a34a', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Выдать
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Админ */}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                                                    <span style={{ color: '#e74c3c' }}>★ Админ</span>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        {hasAdminTag ? (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.admin', 'revoke')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#dc2626', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Отозвать
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleTagUpdate('sylvaire.admin', 'grant')}
+                                                                disabled={tagUpdating}
+                                                                style={{ padding: '4px 12px', background: '#16a34a', border: 'none', borderRadius: '6px', color: 'white', fontSize: '12px', cursor: 'pointer' }}
+                                                            >
+                                                                Выдать
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {tagUpdating && (
+                                                <div style={{ marginTop: '12px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                                                    Обновление...
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {profile.discordId && (
                                 <div className="discord-info">

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { config } from '@/lib/config';
+import { useAuth } from '@/lib/auth-context';
 
 // Define types locally since they might not be in api.ts yet or differ
 interface FeedPost {
@@ -16,55 +17,23 @@ interface FeedPost {
 }
 
 export default function FeedPage() {
-    const [currentUser, setCurrentUser] = useState<{ username: string; token: string } | null>(null);
+    const { user, userTags, canManageTags } = useAuth();
     const [posts, setPosts] = useState<FeedPost[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [postContent, setPostContent] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // Используем теги из контекста авторизации (синхронизированы с LuckPerms)
+    const isAdmin = userTags?.isAdmin || userTags?.isModerator || canManageTags;
+
     useEffect(() => {
-        checkAuth();
         loadPosts(0);
     }, []);
 
-    const checkAuth = async () => {
-        const token = localStorage.getItem('sylvaire_token');
-        const username = localStorage.getItem('sylvaire_username');
-
-        if (token && username) {
-            try {
-                const res = await fetch(`${config.apiUrl}/api/auth/session`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success && data.valid) {
-                    setCurrentUser({ username: data.username, token });
-                    checkAdminStatus(data.username);
-                } else {
-                    localStorage.removeItem('sylvaire_token');
-                    localStorage.removeItem('sylvaire_username');
-                }
-            } catch (e) {
-                // Ignore error
-            }
-        }
-    };
-
-    const checkAdminStatus = async (username: string) => {
-        try {
-            const res = await fetch(`${config.apiUrl}/api/profile/${username}`);
-            const data = await res.json();
-            if (data.success && data.profile.tags) {
-                // Allow both admins and moderators to manage posts
-                if (data.profile.tags.some((t: any) => t.name === 'Админ' || t.name === 'Модератор')) {
-                    setIsAdmin(true);
-                }
-            }
-        } catch (e) { }
-    };
+    // Auth теперь обрабатывается через useAuth hook (см. auth-context.tsx)
+    // Теги синхронизируются с LuckPerms при каждом входе
 
     const loadPosts = async (pageNum: number, append = false) => {
         if (!append) setLoading(true);
@@ -94,7 +63,7 @@ export default function FeedPage() {
     };
 
     const handleSubmitPost = async () => {
-        if (!currentUser || !postContent.trim()) return;
+        if (!user || !postContent.trim()) return;
 
         setSubmitting(true);
         try {
@@ -102,7 +71,7 @@ export default function FeedPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser.token}`
+                    'Authorization': `Bearer ${user.token}`
                 },
                 body: JSON.stringify({ content: postContent })
             });
@@ -123,13 +92,13 @@ export default function FeedPage() {
     };
 
     const handleDeletePost = async (postId: number) => {
-        if (!isAdmin || !currentUser) return;
+        if (!isAdmin || !user) return;
         if (!confirm('Удалить эту публикацию?')) return;
 
         try {
             const res = await fetch(`${config.apiUrl}/api/posts/${postId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                headers: { 'Authorization': `Bearer ${user.token}` }
             });
 
             if (res.ok) {
@@ -151,7 +120,7 @@ export default function FeedPage() {
     };
 
     const handleBanUser = () => {
-        if (!currentUser) return;
+        if (!user) return;
         const username = prompt('Введите никнейм для блокировки:');
         if (!username) return;
         const duration = prompt('Длительность в минутах (пусто = навсегда):');
@@ -161,7 +130,7 @@ export default function FeedPage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}`
+                'Authorization': `Bearer ${user.token}`
             },
             body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
         }).then(res => {
@@ -170,7 +139,7 @@ export default function FeedPage() {
     };
 
     const handleMuteUser = () => {
-        if (!currentUser) return;
+        if (!user) return;
         const username = prompt('Введите никнейм для мута:');
         if (!username) return;
         const duration = prompt('Длительность в минутах (пусто = навсегда):');
@@ -180,7 +149,7 @@ export default function FeedPage() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentUser.token}`
+                'Authorization': `Bearer ${user.token}`
             },
             body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
         }).then(res => {
@@ -197,7 +166,7 @@ export default function FeedPage() {
                         <Link href="/" className="back-link">← На главную</Link>
                     </div>
 
-                    {!currentUser ? (
+                    {!user ? (
                         <div className="login-prompt">
                             <h3>👋 Присоединяйтесь к обсуждению</h3>
                             <p>Войдите в аккаунт, чтобы публиковать сообщения</p>
@@ -207,10 +176,13 @@ export default function FeedPage() {
                         <div className="create-post-card">
                             <div className="create-post-header">
                                 <div className="user-avatar-small">
-                                    <img src={`https://mc-heads.net/avatar/${currentUser.username}/88`} alt={currentUser.username} />
+                                    <img src={`https://mc-heads.net/avatar/${user.username}/88`} alt={user.username} />
                                 </div>
                                 <div className="user-info-small">
-                                    <span className="user-name-small">{currentUser.username}</span>
+                                    <span className="user-name-small">{user.username}</span>
+                                    {userTags?.isAdmin && <span className="admin-tag">Админ</span>}
+                                    {userTags?.isModerator && !userTags?.isAdmin && <span className="mod-tag">Мод</span>}
+                                    {userTags?.hasSubscription && <span className="sub-tag">+</span>}
                                 </div>
                             </div>
                             <textarea
