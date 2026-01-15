@@ -103,7 +103,8 @@ export async function getProfile(username: string): Promise<PlayerProfile | null
     try {
         const data = await api<{ success: boolean; profile: PlayerProfile }>(`/api/profile/${encodeURIComponent(username)}`);
         return data.success ? data.profile : null;
-    } catch {
+    } catch (e) {
+        console.error(`[API] Failed to fetch profile for ${username}:`, e);
         return null;
     }
 }

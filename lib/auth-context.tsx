@@ -34,8 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         try {
             const data = await validateSession(token);
-            if (data.valid && data.username) {
-                setUser({ username: data.username, token });
+            if (data.valid) {
+                // If server returns valid but no username (bug), use stored username
+                const validUsername = data.username || username;
+                if (validUsername) {
+                    setUser({ username: validUsername, token });
+                } else {
+                    // Should not happen, but safe fallback
+                    localStorage.removeItem('sylvaire_token');
+                    localStorage.removeItem('sylvaire_username');
+                    setUser(null);
+                }
             } else {
                 localStorage.removeItem('sylvaire_token');
                 localStorage.removeItem('sylvaire_username');
