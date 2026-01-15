@@ -9,10 +9,27 @@ export default function LeaderboardPage() {
     const [loading, setLoading] = useState(true);
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
+    // Deduplicate by username, keeping entry with higher playtime
+    const deduplicateByUsername = (players: LeaderboardEntry[]) => {
+        const map = new Map<string, LeaderboardEntry>();
+
+        for (const player of players) {
+            const key = player.username.toLowerCase();
+            const existing = map.get(key);
+
+            if (!existing || (player.totalPlaytimeSeconds || 0) > (existing.totalPlaytimeSeconds || 0)) {
+                map.set(key, player);
+            }
+        }
+
+        return Array.from(map.values())
+            .sort((a, b) => (b.totalPlaytimeSeconds || 0) - (a.totalPlaytimeSeconds || 0));
+    };
+
     useEffect(() => {
         setLoading(true);
         getLeaderboard(period).then((data) => {
-            setEntries(data);
+            setEntries(deduplicateByUsername(data));
             setLoading(false);
         });
     }, [period]);
