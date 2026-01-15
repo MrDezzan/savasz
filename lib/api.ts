@@ -71,6 +71,7 @@ export interface PlayerProfile {
     hoursSinceLastSeen: number;
     description: string | null;
     discordId: string | null;
+    discordUsername?: string;
 
     weekPlaytimeSeconds?: number;
     weekPlaytimeFormatted?: string;
