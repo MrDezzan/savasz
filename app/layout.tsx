@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "Sylvaire — Политический RP Minecraft сервер",
+  title: "Sylvaire — Приватный сервер Minecraft",
   description: "Уникальный Minecraft сервер с политической ролевой игрой, организациями и социальной сетью",
   keywords: ["minecraft", "сервер", "rp", "ролевая игра", "политика", "sylvaire"],
   icons: {

@@ -34,7 +34,6 @@ export default function Navbar() {
                 <div className="nav-container">
                     <Link href="/" className="nav-logo">
                         <img src="/assets/logo.png" alt="Sylvaire" className="w-10 h-10 object-contain" />
-                        <span className="font-bold text-xl ml-2">Sylvaire</span>
                     </Link>
                     <div className="nav-links">
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
