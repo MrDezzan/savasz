@@ -1,0 +1,138 @@
+import { config } from './config';
+
+interface FetchOptions extends RequestInit {
+    token?: string;
+}
+
+export async function api<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+    const { token, ...fetchOptions } = options;
+
+    const headers = new Headers(options.headers);
+    if (!headers.has('Content-Type')) {
+        headers.set('Content-Type', 'application/json');
+    }
+
+    if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const response = await fetch(`${config.apiUrl}${endpoint}`, {
+        ...fetchOptions,
+        headers,
+    });
+
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`);
+    }
+
+    return response.json();
+}
+
+// Server stats
+export interface ServerStats {
+    online: number;
+    max: number;
+    totalPlayers: number;
+    totalPlaytime: number;
+}
+
+export async function getServerStats(): Promise<ServerStats> {
+    const data = await api<{ success: boolean; online: number; max: number; totalPlayers: number; totalPlaytime: number }>('/api/server');
+    return data;
+}
+
+// Player profile
+export interface PlayerProfile {
+    uuid: string;
+    username: string;
+    isOnline: boolean;
+    skinUrl: string;
+    avatarUrl: string;
+    totalPlaytimeSeconds: number;
+    weeklyPlaytime: number;
+    monthlyPlaytime: number;
+    joinCount: number;
+    firstJoin: string;
+    lastSeen: string;
+    hoursSinceLastSeen: number;
+    description: string | null;
+    discordId: string | null;
+    tags: { name: string; color: string; expiry?: string }[];
+    organization?: Organization;
+    hasSubscription?: boolean;
+    subscriptionExpiry?: string;
+}
+
+export interface Organization {
+    id: number;
+    shortName: string;
+    fullName: string;
+    bannerUrl?: string;
+    creator: string;
+    createdAt?: string;
+}
+
+export async function getProfile(username: string): Promise<PlayerProfile | null> {
+    try {
+        const data = await api<{ success: boolean; profile: PlayerProfile }>(`/api/profile/${encodeURIComponent(username)}`);
+        return data.success ? data.profile : null;
+    } catch {
+        return null;
+    }
+}
+
+// Leaderboard
+export interface LeaderboardPlayer {
+    uuid: string;
+    username: string;
+    totalPlaytimeSeconds: number;
+    joinCount: number;
+}
+
+export async function getLeaderboard(period?: string): Promise<LeaderboardPlayer[]> {
+    const endpoint = period ? `/api/leaderboard/period?period=${period}` : '/api/leaderboard';
+    const data = await api<{ success: boolean; players: LeaderboardPlayer[] }>(endpoint);
+    return data.players || [];
+}
+
+// Feed
+export interface FeedPost {
+    id: number;
+    authorUsername: string;
+    content: string;
+    createdAt: string;
+    isAdmin?: boolean;
+    hasSubscription?: boolean;
+}
+
+export async function getFeed(page = 0): Promise<{ posts: FeedPost[]; hasMore: boolean; total: number }> {
+    const data = await api<{ success: boolean; posts: FeedPost[]; hasMore: boolean; total: number }>(`/api/feed?page=${page}`);
+    return data;
+}
+
+export async function createPost(content: string, token: string): Promise<{ success: boolean; postId?: number; error?: string }> {
+    return api('/api/posts', {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+        token,
+    });
+}
+
+// Auth
+export async function requestAuth(username: string): Promise<{ success: boolean; error?: string }> {
+    return api('/api/auth/request', {
+        method: 'POST',
+        body: JSON.stringify({ username }),
+    });
+}
+
+export async function verifyAuth(username: string, code: string): Promise<{ success: boolean; token?: string; error?: string; denied?: boolean }> {
+    return api('/api/auth/verify', {
+        method: 'POST',
+        body: JSON.stringify({ username, code }),
+    });
+}
+
+export async function validateSession(token: string): Promise<{ success: boolean; valid: boolean; username?: string }> {
+    return api('/api/auth/session', { token });
+}
