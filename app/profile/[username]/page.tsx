@@ -1,19 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 // notFound import removed - using custom error state instead
 import { getProfile, PlayerProfile } from '@/lib/api';
 
-export default function ProfilePage({ params }: { params: { username: string } }) {
+export default function ProfilePage() {
+    const params = useParams();
     const [profile, setProfile] = useState<PlayerProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!params?.username) return;
+
         setLoading(true);
         // Using window.location to decodeURIComponent in case next params behavior is strict
-        const decodedUsername = decodeURIComponent(params.username);
+        const decodedUsername = decodeURIComponent(params.username as string);
 
         getProfile(decodedUsername).then((p) => {
             if (p) {
@@ -26,7 +30,7 @@ export default function ProfilePage({ params }: { params: { username: string } }
             setError('Ошибка загрузки профиля');
             setLoading(false);
         });
-    }, [params.username]);
+    }, [params]);
 
     const formatDate = (isoString: string) => {
         return new Date(isoString).toLocaleDateString('ru-RU', {

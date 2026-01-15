@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { config } from '@/lib/config';
 
 // Define types locally since they might not be in api.ts yet or differ
@@ -111,10 +112,12 @@ export default function FeedPage() {
                 setPage(0);
                 loadPosts(0, false);
             } else {
-                alert(data.error || 'Ошибка публикации');
+            } else {
+                toast.error(data.error || 'Ошибка публикации');
             }
         } catch (e) {
-            alert('Ошибка соединения');
+        } catch (e) {
+            toast.error('Ошибка соединения');
         } finally {
             setSubmitting(false);
         }
@@ -163,7 +166,7 @@ export default function FeedPage() {
             },
             body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
         }).then(res => {
-            if (res.ok) alert('Пользователь заблокирован');
+            if (res.ok) toast.success('Пользователь заблокирован');
         });
     };
 
@@ -182,7 +185,7 @@ export default function FeedPage() {
             },
             body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
         }).then(res => {
-            if (res.ok) alert('Пользователь замучен');
+            if (res.ok) toast.success('Пользователь замучен');
         });
     };
 
