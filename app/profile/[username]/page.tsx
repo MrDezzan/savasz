@@ -310,6 +310,10 @@ export default function ProfilePage() {
                                 <div className="stat-label">Всего наиграно</div>
                             </div>
                             <div className="stat-card">
+                                <div className="stat-value">{profile.monthPlaytimeFormatted || '0с'}</div>
+                                <div className="stat-label">За месяц</div>
+                            </div>
+                            <div className="stat-card">
                                 <div className="stat-value">{profile.weekPlaytimeFormatted || '0с'}</div>
                                 <div className="stat-label">За неделю</div>
                             </div>
