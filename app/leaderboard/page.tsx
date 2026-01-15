@@ -106,7 +106,9 @@ export default function LeaderboardPage() {
                                         </div>
                                         <div className="player-stats">
                                             <span>Всего наиграно:</span>
-                                            <span className="player-playtime">{entry.formattedPlaytime}</span>
+                                            <span className="player-playtime">
+                                                {entry.totalPlaytimeSeconds ? Math.floor(entry.totalPlaytimeSeconds / 3600) : 0} ч.
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="profile-arrow">→</div>
