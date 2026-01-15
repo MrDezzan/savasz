@@ -1,31 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { validateSession } from '@/lib/api';
+import { useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Navbar() {
-    const [user, setUser] = useState<{ username: string } | null>(null);
+    const { user, loading, logout } = useAuth();
     const [notification, setNotification] = useState<string | null>(null);
-
-    useEffect(() => {
-        const token = localStorage.getItem('sylvaire_token');
-        if (token) {
-            validateSession(token).then((data) => {
-                if (data.valid && data.username) {
-                    setUser({ username: data.username });
-                } else {
-                    localStorage.removeItem('sylvaire_token');
-                    localStorage.removeItem('sylvaire_username');
-                }
-            });
-        }
-    }, []);
+    const [showUserMenu, setShowUserMenu] = useState(false);
 
     const showNotification = (msg: string) => {
         setNotification(msg);
         setTimeout(() => setNotification(null), 5000);
+    };
+
+    const handleLogout = () => {
+        logout();
+        setShowUserMenu(false);
     };
 
     return (
@@ -41,10 +32,88 @@ export default function Navbar() {
                         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('📖 Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
                         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('🗺️ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
                     </div>
-                    {user ? (
-                        <Link href={`/profile/${user.username}`} className="nav-btn">
-                            {user.username}
-                        </Link>
+
+                    {loading ? (
+                        <div className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>...</div>
+                    ) : user ? (
+                        <div className="nav-user-menu" style={{ position: 'relative' }}>
+                            <button
+                                className="nav-btn"
+                                onClick={() => setShowUserMenu(!showUserMenu)}
+                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                            >
+                                <img
+                                    src={`https://mc-heads.net/avatar/${user.username}/24`}
+                                    alt=""
+                                    style={{ width: '24px', height: '24px', borderRadius: '4px' }}
+                                />
+                                {user.username}
+                            </button>
+                            {showUserMenu && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 'calc(100% + 8px)',
+                                    right: 0,
+                                    background: 'rgba(15, 23, 42, 0.98)',
+                                    backdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                                    borderRadius: '12px',
+                                    padding: '8px',
+                                    minWidth: '160px',
+                                    zIndex: 1000,
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.4)'
+                                }}>
+                                    <Link
+                                        href={`/profile/${user.username}`}
+                                        className="nav-dropdown-item"
+                                        onClick={() => setShowUserMenu(false)}
+                                        style={{
+                                            display: 'block',
+                                            padding: '10px 14px',
+                                            color: 'white',
+                                            textDecoration: 'none',
+                                            borderRadius: '8px',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        👤 Мой профиль
+                                    </Link>
+                                    <Link
+                                        href="/feed"
+                                        className="nav-dropdown-item"
+                                        onClick={() => setShowUserMenu(false)}
+                                        style={{
+                                            display: 'block',
+                                            padding: '10px 14px',
+                                            color: 'white',
+                                            textDecoration: 'none',
+                                            borderRadius: '8px',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        📰 Лента
+                                    </Link>
+                                    <div style={{ height: '1px', background: 'rgba(99, 102, 241, 0.2)', margin: '8px 0' }} />
+                                    <button
+                                        onClick={handleLogout}
+                                        style={{
+                                            display: 'block',
+                                            width: '100%',
+                                            padding: '10px 14px',
+                                            color: '#f87171',
+                                            background: 'none',
+                                            border: 'none',
+                                            textAlign: 'left',
+                                            borderRadius: '8px',
+                                            fontSize: '14px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        🚪 Выйти
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     ) : (
                         <Link href="/login" className="nav-btn">Войти</Link>
                     )}

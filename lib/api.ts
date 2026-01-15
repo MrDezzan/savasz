@@ -33,12 +33,26 @@ export interface ServerStats {
     online: number;
     max: number;
     totalPlayers: number;
-    totalPlaytime: number;
+    tps: number;
 }
 
 export async function getServerStats(): Promise<ServerStats> {
-    const data = await api<{ success: boolean; online: number; max: number; totalPlayers: number; totalPlaytime: number }>('/api/server');
-    return data;
+    const data = await api<{
+        success: boolean;
+        server: {
+            online: number;
+            maxPlayers: number;
+            totalPlayers: number;
+            tps: number;
+        }
+    }>('/api/server');
+
+    return {
+        online: data.server?.online ?? 0,
+        max: data.server?.maxPlayers ?? 20,
+        totalPlayers: data.server?.totalPlayers ?? 0,
+        tps: data.server?.tps ?? 20.0,
+    };
 }
 
 // Player profile

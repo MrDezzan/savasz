@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { config } from '@/lib/config';
+import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { user, login } = useAuth();
     const [state, setState] = useState<'username' | 'code' | 'success' | 'denied'>('username');
     const [username, setUsername] = useState('');
     const [code, setCode] = useState('');
@@ -14,19 +16,12 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [countdown, setCountdown] = useState(300);
 
+    // Redirect if already logged in
     useEffect(() => {
-        // Check if already logged in
-        const token = localStorage.getItem('sylvaire_token');
-        if (token) {
-            fetch(`${config.apiUrl}/api/auth/session`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => res.json()).then(data => {
-                if (data.success && data.valid) {
-                    router.push('/feed');
-                }
-            }).catch(() => { });
+        if (user) {
+            router.push('/feed');
         }
-    }, [router]);
+    }, [user, router]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -78,8 +73,8 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (data.success) {
-                localStorage.setItem('sylvaire_token', data.token);
-                localStorage.setItem('sylvaire_username', username);
+                // Use auth context login function
+                login(data.token, username);
                 setState('success');
                 setTimeout(() => {
                     router.push('/feed');
@@ -98,126 +93,104 @@ export default function LoginPage() {
         }
     };
 
-    const formatCountdown = (seconds: number) => {
+    const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
     return (
-        <section className="login-page">
-            <div className="login-card">
-                {state === 'username' && (
-                    <div id="state-username" className="auth-state active">
-                        <div className="login-icon">🔐</div>
-                        <h1 className="login-title">Вход в аккаунт</h1>
-                        <p className="login-subtitle">
-                            Введите ваш игровой никнейм и мы отправим код подтверждения в Discord
-                        </p>
+        <section className="login-section">
+            <div className="login-container">
+                <div className="login-card">
+                    <div className="login-header">
+                        <Link href="/" className="login-logo">
+                            <img src="/assets/logo.png" alt="Sylvaire" />
+                        </Link>
+                        <h1>Вход в аккаунт</h1>
+                        <p>Авторизуйтесь через Discord для доступа к сайту</p>
+                    </div>
 
-                        {error && <div className="error-message">{error}</div>}
-
-                        <form onSubmit={handleRequestCode}>
-                            <div className="input-group">
-                                <label className="input-label" htmlFor="username">Никнейм в Minecraft</label>
+                    {state === 'username' && (
+                        <form className="login-form" onSubmit={handleRequestCode}>
+                            <div className="form-group">
+                                <label htmlFor="username">Никнейм в Minecraft</label>
                                 <input
                                     type="text"
                                     id="username"
-                                    className="input-field"
-                                    placeholder="Например: Steve"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="Ваш игровой ник"
                                     required
                                     minLength={3}
                                     maxLength={16}
                                     autoComplete="off"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
                                 />
                             </div>
-                            <button type="submit" className="login-btn" disabled={loading}>
-                                {loading ? <span className="loader"></span> : 'Получить код'}
+                            {error && <div className="form-error">{error}</div>}
+                            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+                                {loading ? 'Отправка...' : 'Получить код →'}
                             </button>
+                            <p className="login-hint">
+                                💡 Код будет отправлен в личные сообщения Discord-бота
+                            </p>
                         </form>
+                    )}
 
-                        <div className="login-steps">
-                            <div className="steps-title">Как это работает?</div>
-                            <div className="step">
-                                <span className="step-number">1</span>
-                                <span className="step-text">Введите никнейм, которым вы играете на сервере</span>
+                    {state === 'code' && (
+                        <form className="login-form" onSubmit={handleVerifyCode}>
+                            <div className="code-info">
+                                <p>Код отправлен игроку <strong>{username}</strong></p>
+                                <p className="countdown">Код действителен: {formatTime(countdown)}</p>
                             </div>
-                            <div className="step">
-                                <span className="step-number">2</span>
-                                <span className="step-text">Мы отправим 6-значный код в Discord сообщением</span>
-                            </div>
-                            <div className="step">
-                                <span className="step-number">3</span>
-                                <span className="step-text">Введите код на сайте и войдите в аккаунт</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {state === 'code' && (
-                    <div id="state-code" className="auth-state active">
-                        <div className="login-icon">💬</div>
-                        <h1 className="login-title">Проверьте Discord</h1>
-                        <p className="login-subtitle">
-                            Мы отправили 6-значный код в личные сообщения Discord. Введите его ниже:
-                        </p>
-
-                        {error && <div className="error-message">{error}</div>}
-
-                        <form onSubmit={handleVerifyCode}>
-                            <div className="input-group">
-                                <label className="input-label" htmlFor="code">Код подтверждения</label>
+                            <div className="form-group">
+                                <label htmlFor="code">6-значный код</label>
                                 <input
                                     type="text"
                                     id="code"
-                                    className="input-field code-input"
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                     placeholder="000000"
                                     required
-                                    pattern="[0-9]{6}"
-                                    maxLength={6}
-                                    inputMode="numeric"
+                                    pattern="\d{6}"
                                     autoComplete="off"
-                                    value={code}
-                                    onChange={(e) => setCode(e.target.value)}
+                                    className="code-input"
                                 />
                             </div>
-                            <button type="submit" className="login-btn" disabled={loading}>
-                                {loading ? <span className="loader"></span> : 'Подтвердить'}
+                            {error && <div className="form-error">{error}</div>}
+                            <button type="submit" className="btn btn-primary btn-block" disabled={loading || code.length !== 6}>
+                                {loading ? 'Проверка...' : 'Подтвердить'}
+                            </button>
+                            <button type="button" className="btn btn-secondary btn-block" onClick={() => setState('username')}>
+                                ← Назад
                             </button>
                         </form>
+                    )}
 
-                        <p className="countdown">Код действителен ещё <strong>{formatCountdown(countdown)}</strong></p>
+                    {state === 'success' && (
+                        <div className="login-success">
+                            <div className="success-icon">✓</div>
+                            <h2>Добро пожаловать!</h2>
+                            <p>Вы успешно авторизовались как <strong>{username}</strong></p>
+                            <p className="redirect-text">Перенаправление...</p>
+                        </div>
+                    )}
 
-                        <p className="back-to-login">
-                            <button onClick={() => setState('username')} style={{ background: 'none', border: 'none', color: 'var(--accent-light)', cursor: 'pointer', fontSize: '14px' }}>
-                                ← Ввести другой никнейм
+                    {state === 'denied' && (
+                        <div className="login-denied">
+                            <div className="denied-icon">✕</div>
+                            <h2>Доступ запрещён</h2>
+                            <p>Авторизация была отклонена в Discord.</p>
+                            <button className="btn btn-secondary btn-block" onClick={() => setState('username')}>
+                                Попробовать снова
                             </button>
-                        </p>
-                    </div>
-                )}
+                        </div>
+                    )}
+                </div>
 
-                {state === 'success' && (
-                    <div id="state-success" className="auth-state active">
-                        <div className="success-icon">✅</div>
-                        <h1 className="login-title">Добро пожаловать!</h1>
-                        <p className="login-subtitle">
-                            Вы успешно вошли в аккаунт. Перенаправление...
-                        </p>
-                    </div>
-                )}
-
-                {state === 'denied' && (
-                    <div id="state-denied" className="auth-state active">
-                        <div className="success-icon">🚫</div>
-                        <h1 className="login-title">Доступ запрещён</h1>
-                        <p className="login-subtitle">
-                            Владелец аккаунта отклонил эту попытку входа. Если это были вы, попробуйте ещё раз.
-                        </p>
-                        <button className="login-btn" onClick={() => setState('username')}>Попробовать снова</button>
-                    </div>
-                )}
+                <div className="login-footer">
+                    <p>Ещё не на сервере? <a href="https://dsc.gg/sylvaire">Присоединяйтесь к Discord</a></p>
+                </div>
             </div>
         </section>
     );
