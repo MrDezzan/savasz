@@ -109,6 +109,14 @@ export async function getProfile(username: string): Promise<PlayerProfile | null
     }
 }
 
+export async function updateDescription(username: string, description: string, token: string): Promise<{ success: boolean; error?: string }> {
+    return api(`/api/profile/${encodeURIComponent(username)}/description`, {
+        method: 'POST',
+        body: JSON.stringify({ description }),
+        token,
+    });
+}
+
 // Leaderboard
 export type LeaderboardPeriod = 'ALL_TIME' | 'SEASON' | 'MONTH' | 'WEEK';
 

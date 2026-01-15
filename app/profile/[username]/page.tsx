@@ -3,25 +3,33 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-// notFound import removed - using custom error state instead
-import { getProfile, PlayerProfile } from '@/lib/api';
+import { getProfile, PlayerProfile, updateDescription } from '@/lib/api';
+import { useAuth } from '@/lib/auth-context';
+import SkinViewer from '@/components/SkinViewer';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
     const params = useParams();
+    const { user } = useAuth();
     const [profile, setProfile] = useState<PlayerProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Edit state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editDesc, setEditDesc] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (!params?.username) return;
 
         setLoading(true);
-        // Using window.location to decodeURIComponent in case next params behavior is strict
         const decodedUsername = decodeURIComponent(params.username as string);
 
         getProfile(decodedUsername).then((p) => {
             if (p) {
                 setProfile(p);
+                setEditDesc(p.description || '');
             } else {
                 setError('Игрок не найден');
             }
@@ -31,6 +39,26 @@ export default function ProfilePage() {
             setLoading(false);
         });
     }, [params]);
+
+    const handleSaveDescription = async () => {
+        if (!profile || !user) return;
+
+        setIsSaving(true);
+        try {
+            const result = await updateDescription(profile.username, editDesc, user.token);
+            if (result.success) {
+                setProfile({ ...profile, description: editDesc });
+                setIsEditing(false);
+                toast.success('Описание обновлено');
+            } else {
+                toast.error('Ошибка обновления: ' + result.error);
+            }
+        } catch (e) {
+            toast.error('Не удалось сохранить изменения');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const formatDate = (isoString: string) => {
         return new Date(isoString).toLocaleDateString('ru-RU', {
@@ -78,6 +106,8 @@ export default function ProfilePage() {
         );
     }
 
+    const isOwnProfile = user?.username === profile.username;
+
     return (
         <section className="profile-page">
             <div className="container">
@@ -86,18 +116,19 @@ export default function ProfilePage() {
                 <div className="profile-container">
                     <div className="profile-left">
                         <div className="skin-card">
-                            <div className="skin-wrapper">
-                                <img
-                                    src={profile.skinUrl}
-                                    alt={profile.username}
-                                    className="skin-image"
-                                    onError={(e) => { e.currentTarget.src = 'https://mc-heads.net/body/MHF_Steve/200'; }}
+                            <div className="skin-viewer-container">
+                                <SkinViewer
+                                    skinUrl={profile.skinUrl}
+                                    width={300}
+                                    height={400}
                                 />
-                                <div className={`online-badge ${profile.isOnline ? '' : 'offline'}`}>
-                                    {profile.isOnline && <span className="online-dot"></span>}
-                                    {profile.isOnline ? 'Онлайн' : formatLastSeen(profile.hoursSinceLastSeen)}
-                                </div>
                             </div>
+
+                            <div className={`online-badge ${profile.isOnline ? '' : 'offline'}`} style={{ marginTop: '16px' }}>
+                                {profile.isOnline && <span className="online-dot"></span>}
+                                {profile.isOnline ? 'Онлайн' : formatLastSeen(profile.hoursSinceLastSeen)}
+                            </div>
+
                             <h1 className="player-username-large">{profile.username}</h1>
                             <div className="player-tags">
                                 {profile.tags && profile.tags.map((tag, idx) => {
@@ -171,10 +202,53 @@ export default function ProfilePage() {
                         )}
 
                         <div className="description-card">
-                            <div className="info-title">📝 О себе</div>
-                            <p className={`description-text ${profile.description ? '' : 'no-description'}`}>
-                                {profile.description || 'Пользователь пока не добавил описание'}
-                            </p>
+                            <div className="description-header">
+                                <div className="info-title">📝 О себе</div>
+                                {isOwnProfile && !isEditing && (
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="edit-btn"
+                                        title="Редактировать описание"
+                                    >
+                                        ✏️
+                                    </button>
+                                )}
+                            </div>
+
+                            {isEditing ? (
+                                <div className="description-editor">
+                                    <textarea
+                                        value={editDesc}
+                                        onChange={(e) => setEditDesc(e.target.value)}
+                                        placeholder="Расскажите немного о себе..."
+                                        maxLength={500}
+                                        disabled={isSaving}
+                                    />
+                                    <div className="editor-actions">
+                                        <button
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => {
+                                                setIsEditing(false);
+                                                setEditDesc(profile.description || '');
+                                            }}
+                                            disabled={isSaving}
+                                        >
+                                            Отмена
+                                        </button>
+                                        <button
+                                            className="btn btn-primary btn-sm"
+                                            onClick={handleSaveDescription}
+                                            disabled={isSaving}
+                                        >
+                                            {isSaving ? 'Сохранение...' : 'Сохранить'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className={`description-text ${profile.description ? '' : 'no-description'}`}>
+                                    {profile.description || 'Пользователь пока не добавил описание'}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
