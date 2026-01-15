@@ -86,6 +86,7 @@ export default function HomePage() {
               <img src="/assets/hero.png" alt="Sylvaire" className="hero-image" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
             </div>
           </div>
+        </div>
       </section>
 
       <section className="marquee-section">
