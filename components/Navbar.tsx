@@ -6,9 +6,8 @@ import { useState, useEffect } from 'react';
 import { validateSession } from '@/lib/api';
 
 export default function Navbar() {
-    const pathname = usePathname();
     const [user, setUser] = useState<{ username: string } | null>(null);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [notification, setNotification] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem('sylvaire_token');
@@ -24,99 +23,77 @@ export default function Navbar() {
         }
     }, []);
 
-    const navLinks = [
-        { href: '/', label: '🏠 Главная' },
-        { href: '/leaderboard', label: '📊 Статистика' },
-        { href: '/feed', label: '💬 Лента' },
-        { href: '/orgs', label: '🏢 Организации' },
-    ];
+    const showNotification = (msg: string) => {
+        setNotification(msg);
+        setTimeout(() => setNotification(null), 5000);
+    };
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-xl border-b border-white/10">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white hover:text-indigo-400 transition-colors">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" strokeLinejoin="round" />
-                        <path d="M2 17L12 22L22 17" strokeLinejoin="round" />
-                        <path d="M2 12L12 17L22 12" strokeLinejoin="round" />
-                    </svg>
-                    <span className="hidden sm:inline">Sylvaire</span>
-                </Link>
-
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            href={link.href}
-                            className={`text-sm font-medium transition-colors ${pathname === link.href
-                                ? 'text-indigo-400'
-                                : 'text-slate-300 hover:text-white'
-                                }`}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
-                </div>
-
-                {/* User/Login */}
-                <div className="flex items-center gap-4">
+        <>
+            <nav className="navbar">
+                <div className="nav-container">
+                    <Link href="/" className="nav-logo">
+                        <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                        </svg>
+                    </Link>
+                    <div className="nav-links">
+                        <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
+                        <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
+                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('📖 Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
+                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('🗺️ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
+                    </div>
                     {user ? (
-                        <Link
-                            href={`/profile/${user.username}`}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
-                        >
-                            <img
-                                src={`https://mc-heads.net/avatar/${user.username}/32`}
-                                alt=""
-                                className="w-6 h-6 rounded"
-                            />
-                            <span className="text-sm font-medium text-white">{user.username}</span>
+                        <Link href={`/profile/${user.username}`} className="nav-btn">
+                            {user.username}
                         </Link>
                     ) : (
-                        <Link
-                            href="/login"
-                            className="px-5 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl text-sm font-semibold text-white hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
-                        >
-                            Войти
-                        </Link>
+                        <Link href="/login" className="nav-btn">Войти</Link>
                     )}
-
-                    {/* Mobile Menu Toggle */}
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="md:hidden p-2 text-slate-300 hover:text-white"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {isMenuOpen ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            )}
-                        </svg>
-                    </button>
                 </div>
-            </div>
+            </nav>
 
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className="md:hidden bg-slate-900/95 border-b border-white/10">
-                    <div className="container mx-auto px-4 py-4 flex flex-col gap-3">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsMenuOpen(false)}
-                                className={`py-2 text-sm font-medium ${pathname === link.href ? 'text-indigo-400' : 'text-slate-300'
-                                    }`}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                    </div>
+            {notification && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '24px',
+                    right: '24px',
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    borderRadius: '16px',
+                    padding: '16px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    zIndex: 10000,
+                    animation: 'slideUp 0.4s ease',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                    color: 'white',
+                    fontSize: '14px'
+                }}>
+                    <p>{notification}</p>
+                    <button
+                        onClick={() => setNotification(null)}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            padding: '0'
+                        }}
+                    >✕</button>
+                    <style jsx>{`
+                        @keyframes slideUp {
+                            from { opacity: 0; transform: translateY(20px); }
+                            to { opacity: 1; transform: translateY(0); }
+                        }
+                    `}</style>
                 </div>
             )}
-        </nav>
+        </>
     );
 }

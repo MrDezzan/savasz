@@ -1,61 +1,45 @@
 import Link from 'next/link';
-import { config } from '@/lib/config';
 
 export default function Footer() {
     return (
-        <footer className="bg-slate-900/50 border-t border-white/10 py-12">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    {/* Brand */}
-                    <div>
-                        <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white mb-4">
-                            <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M12 2L2 7L12 12L22 7L12 2Z" strokeLinejoin="round" />
-                                <path d="M2 17L12 22L22 17" strokeLinejoin="round" />
-                                <path d="M2 12L12 17L22 12" strokeLinejoin="round" />
-                            </svg>
-                            Sylvaire
-                        </Link>
-                        <p className="text-slate-400 text-sm">
-                            Уникальный Minecraft сервер с политической ролевой игрой
-                        </p>
+        <footer className="footer">
+            <div className="footer-container">
+                <div className="footer-brand">
+                    <div className="footer-logo">
+                        <svg className="logo-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                        </svg>
+                        <span>Sylvaire</span>
                     </div>
-
-                    {/* Navigation */}
-                    <div>
-                        <h4 className="text-white font-semibold mb-4">Навигация</h4>
-                        <div className="flex flex-col gap-2">
-                            <Link href="/" className="text-slate-400 hover:text-white text-sm transition-colors">Главная</Link>
-                            <Link href="/leaderboard" className="text-slate-400 hover:text-white text-sm transition-colors">Статистика</Link>
-                            <Link href="/feed" className="text-slate-400 hover:text-white text-sm transition-colors">Лента</Link>
-                        </div>
-                    </div>
-
-                    {/* Social */}
-                    <div>
-                        <h4 className="text-white font-semibold mb-4">Сообщество</h4>
-                        <div className="flex flex-col gap-2">
-                            <a href={config.discordUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white text-sm transition-colors">Discord</a>
-                            <a href={config.telegramUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white text-sm transition-colors">Telegram</a>
-                            <a href={config.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white text-sm transition-colors">YouTube</a>
-                        </div>
-                    </div>
-
-                    {/* Server */}
-                    <div>
-                        <h4 className="text-white font-semibold mb-4">Сервер</h4>
-                        <div className="bg-slate-800/50 rounded-xl p-4">
-                            <p className="text-slate-400 text-sm mb-2">IP-адрес:</p>
-                            <code className="text-indigo-400 font-mono text-lg">{config.serverIp}</code>
-                        </div>
-                    </div>
+                    <p className="footer-tagline">Приватный сервер Minecraft</p>
                 </div>
-
-                <div className="border-t border-white/10 pt-8 text-center">
-                    <p className="text-slate-500 text-sm">
-                        © {new Date().getFullYear()} Sylvaire. Все права защищены.
-                    </p>
+                <div className="footer-links">
+                    <Link href="/">Главная</Link>
+                    <a href="https://shop.sylvaire.ru">Магазин</a>
+                    <Link href="/leaderboard">Статистика</Link>
                 </div>
+                <div className="footer-social">
+                    <a href="https://dsc.gg/sylvaire" title="Discord">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12" />
+                        </svg>
+                    </a>
+                    <a href="https://t.me/sylvairemc" title="Telegram">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19c-.14.75-.42 1-.68 1.03c-.58.05-1.02-.38-1.58-.75c-.88-.58-1.38-.94-2.23-1.5c-.99-.65-.35-1.01.22-1.59c.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02c-.09.02-1.49.95-4.22 2.79c-.4.27-.76.41-1.08.4c-.36-.01-1.04-.2-1.55-.37c-.63-.2-1.12-.31-1.08-.66c.02-.18.27-.36.74-.55c2.92-1.27 4.86-2.11 5.83-2.51c2.78-1.16 3.35-1.36 3.73-1.36c.08 0 .27.02.39.12c.1.08.13.19.14.27c-.01.06.01.24 0 .38" />
+                        </svg>
+                    </a>
+                    <a href="https://youtube.com/@Силвейр" title="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="m10 15l5.19-3L10 9zm11.56-7.83c.13.47.22 1.1.28 1.9c.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83c-.25.9-.83 1.48-1.73 1.73c-.47.13-1.33.22-2.65.28c-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44c-.9-.25-1.48-.83-1.73-1.73c-.13-.47-.22-1.1-.28-1.9c-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83c.25-.9.83-1.48 1.73-1.73c.47-.13 1.33-.22 2.65-.28c1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44c.9.25 1.48.83 1.73 1.73" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div className="footer-bottom">
+                <p>© Sylvaire 2025. Мы никак не связаны с Microsoft, Mojang.</p>
             </div>
         </footer>
     );
