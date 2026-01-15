@@ -15,16 +15,16 @@ export default function SkinViewer({ skinUrl, width = 300, height = 400 }: SkinV
             skinUrl={skinUrl}
             height={height}
             width={width}
-            onReady={(instance) => {
+            onReady={({ viewer }) => {
                 // Set animation to walking
-                instance.animation = instance.animations.run;
-                instance.animation.speed = 0.5;
-                // instance.nameTag = null; // Hide nametag if shown by default
+                if (viewer.animations) {
+                    viewer.animation = viewer.animations.run;
+                    viewer.animation.speed = 0.5;
+                }
             }}
             options={{
                 zoom: 0.9,
-                fov: 70,
-                globalLight: { intensity: 1.5, color: 0xFFFFFF }
+                fov: 70
             }}
         />
     );
