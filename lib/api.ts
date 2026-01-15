@@ -49,18 +49,31 @@ export interface PlayerProfile {
     skinUrl: string;
     avatarUrl: string;
     totalPlaytimeSeconds: number;
-    weeklyPlaytime: number;
-    monthlyPlaytime: number;
+    formattedPlaytime: string;
+
     joinCount: number;
     firstJoin: string;
     lastSeen: string;
     hoursSinceLastSeen: number;
     description: string | null;
     discordId: string | null;
-    tags: { name: string; color: string; expiry?: string }[];
+
+    weekPlaytimeSeconds?: number;
+    weekPlaytimeFormatted?: string;
+    monthPlaytimeSeconds?: number;
+    monthPlaytimeFormatted?: string;
+
+    tags: {
+        name: string;
+        color: string;
+        icon?: string;
+        expiresIn?: string;
+        expiresAt?: string;
+    }[];
     organization?: Organization;
     hasSubscription?: boolean;
     subscriptionExpiry?: string;
+    subscriptionExpires?: string;
 }
 
 export interface Organization {
@@ -95,8 +108,12 @@ export interface LeaderboardEntry {
 
 export async function getLeaderboard(period: LeaderboardPeriod = 'ALL_TIME'): Promise<LeaderboardEntry[]> {
     const endpoint = period === 'ALL_TIME' ? '/api/leaderboard' : `/api/leaderboard/period?period=${period}`;
-    const data = await api<{ success: boolean; players: LeaderboardEntry[] }>(endpoint);
-    return data.players || [];
+    const data = await api<{ success: boolean; leaderboard: LeaderboardEntry[]; players?: LeaderboardEntry[] }>(endpoint);
+    // Backend sends 'leaderboard' for period queries and 'leaderboard' (or 'players'?) for simple query?
+    // Checking WebServer.java line 620: "leaderboard", result
+    // Checking WebServer.java line 658: "leaderboard", result
+    // So both return 'leaderboard'.
+    return data.leaderboard || data.players || [];
 }
 
 // Feed

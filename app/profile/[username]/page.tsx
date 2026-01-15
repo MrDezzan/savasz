@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+// notFound import removed - using custom error state instead
 import { getProfile, PlayerProfile } from '@/lib/api';
 
 export default function ProfilePage({ params }: { params: { username: string } }) {
@@ -156,7 +156,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
                                 <div className="info-row">
                                     <span className="info-label">Действует</span>
                                     <span className="info-value">
-                                        {profile.subscriptionExpires === 'permanent' ? 'Навсегда' : `до ${formatDate(profile.subscriptionExpires)}`}
+                                        {profile.subscriptionExpires === 'permanent'
+                                            ? 'Навсегда'
+                                            : profile.subscriptionExpires
+                                                ? `до ${formatDate(profile.subscriptionExpires)}`
+                                                : 'Активна'}
                                     </span>
                                 </div>
                             </div>
