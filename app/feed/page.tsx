@@ -13,6 +13,7 @@ interface FeedPost {
     content: string;
     createdAt: string;
     isAdmin: boolean;
+    isModerator?: boolean;
     hasSubscription: boolean;
 }
 
@@ -162,8 +163,8 @@ export default function FeedPage() {
             <div className="container">
                 <div className="feed-container">
                     <div className="feed-header">
+                        <Link href="/" className="back-link" style={{ marginRight: 'auto' }}>← На главную</Link>
                         <h1 className="feed-title">Лента сообщества</h1>
-                        <Link href="/" className="back-link">← На главную</Link>
                     </div>
 
                     {!user ? (
@@ -180,9 +181,14 @@ export default function FeedPage() {
                                 </div>
                                 <div className="user-info-small">
                                     <span className="user-name-small">{user.username}</span>
-                                    {userTags?.isAdmin && <span className="admin-tag">Админ</span>}
-                                    {userTags?.isModerator && !userTags?.isAdmin && <span className="mod-tag">Мод</span>}
-                                    {userTags?.hasSubscription && <span className="sub-tag">+</span>}
+                                    {/* Hierarchy: Admin > Mod > Sub */}
+                                    {userTags?.isAdmin ? (
+                                        <span className="admin-tag">Админ</span>
+                                    ) : userTags?.isModerator ? (
+                                        <span className="text-tag" style={{ color: '#3498DB', fontWeight: 600, fontSize: '13px' }}>Мод</span>
+                                    ) : userTags?.hasSubscription ? (
+                                        <span className="sub-tag">+</span>
+                                    ) : null}
                                 </div>
                             </div>
                             <textarea
@@ -242,8 +248,14 @@ export default function FeedPage() {
                                                     <Link href={`/profile/${post.authorUsername}`}>
                                                         {post.authorUsername}
                                                     </Link>
-                                                    {post.isAdmin && <span className="admin-tag">Админ</span>}
-                                                    {post.hasSubscription && <span className="sub-tag">+</span>}
+                                                    {/* Hierarchy: Admin > Mod > Sub */}
+                                                    {post.isAdmin ? (
+                                                        <span className="admin-tag">Админ</span>
+                                                    ) : post.isModerator ? (
+                                                        <span className="text-tag" style={{ color: '#3498DB', fontWeight: 600, fontSize: '13px', marginLeft: '6px' }}>Мод</span>
+                                                    ) : post.hasSubscription ? (
+                                                        <span className="sub-tag">+</span>
+                                                    ) : null}
                                                 </span>
                                                 <span className="post-time">{formatTimeAgo(post.createdAt)}</span>
                                             </div>

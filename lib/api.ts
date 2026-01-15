@@ -147,6 +147,7 @@ export interface FeedPost {
     content: string;
     createdAt: string;
     isAdmin?: boolean;
+    isModerator?: boolean;
     hasSubscription?: boolean;
 }
 
