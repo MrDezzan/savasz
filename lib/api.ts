@@ -82,16 +82,20 @@ export async function getProfile(username: string): Promise<PlayerProfile | null
 }
 
 // Leaderboard
-export interface LeaderboardPlayer {
+export type LeaderboardPeriod = 'ALL_TIME' | 'SEASON' | 'MONTH' | 'WEEK';
+
+export interface LeaderboardEntry {
     uuid: string;
     username: string;
     totalPlaytimeSeconds: number;
+    formattedPlaytime: string;
     joinCount: number;
+    isOnline: boolean;
 }
 
-export async function getLeaderboard(period?: string): Promise<LeaderboardPlayer[]> {
-    const endpoint = period ? `/api/leaderboard/period?period=${period}` : '/api/leaderboard';
-    const data = await api<{ success: boolean; players: LeaderboardPlayer[] }>(endpoint);
+export async function getLeaderboard(period: LeaderboardPeriod = 'ALL_TIME'): Promise<LeaderboardEntry[]> {
+    const endpoint = period === 'ALL_TIME' ? '/api/leaderboard' : `/api/leaderboard/period?period=${period}`;
+    const data = await api<{ success: boolean; players: LeaderboardEntry[] }>(endpoint);
     return data.players || [];
 }
 
