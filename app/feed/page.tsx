@@ -112,10 +112,8 @@ export default function FeedPage() {
                 setPage(0);
                 loadPosts(0, false);
             } else {
-            } else {
                 toast.error(data.error || 'Ошибка публикации');
             }
-        } catch (e) {
         } catch (e) {
             toast.error('Ошибка соединения');
         } finally {
