@@ -58,7 +58,8 @@ export default function FeedPage() {
             const res = await fetch(`${config.apiUrl}/api/profile/${username}`);
             const data = await res.json();
             if (data.success && data.profile.tags) {
-                if (data.profile.tags.some((t: any) => t.name === 'Админ')) {
+                // Allow both admins and moderators to manage posts
+                if (data.profile.tags.some((t: any) => t.name === 'Админ' || t.name === 'Модератор')) {
                     setIsAdmin(true);
                 }
             }
@@ -236,7 +237,7 @@ export default function FeedPage() {
 
                     {isAdmin && (
                         <div className="admin-panel visible">
-                            <div className="admin-panel-title">🛡️ Панель модерации</div>
+                            <div className="admin-panel-title">◈ Панель модерации</div>
                             <div className="admin-actions">
                                 <button className="admin-btn" onClick={handleBanUser}>Заблокировать пользователя</button>
                                 <button className="admin-btn" onClick={handleMuteUser}>Замутить пользователя</button>
@@ -252,7 +253,7 @@ export default function FeedPage() {
                             </div>
                         ) : posts.length === 0 ? (
                             <div className="feed-empty">
-                                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+                                <div style={{ fontSize: '48px', marginBottom: '16px' }}>◇</div>
                                 <h3>Пока нет публикаций</h3>
                                 <p style={{ color: 'var(--text-secondary)' }}>Станьте первым, кто опубликует сообщение!</p>
                             </div>
@@ -277,7 +278,7 @@ export default function FeedPage() {
                                         </div>
                                         {isAdmin && (
                                             <div className="post-actions">
-                                                <button className="post-action-btn" onClick={() => handleDeletePost(post.id)}>🗑️ Удалить</button>
+                                                <button className="post-action-btn" onClick={() => handleDeletePost(post.id)}>✕ Удалить</button>
                                             </div>
                                         )}
                                     </div>

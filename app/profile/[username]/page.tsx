@@ -96,7 +96,7 @@ export default function ProfilePage() {
             <section className="profile-page">
                 <div className="container">
                     <div className="profile-error">
-                        <div style={{ fontSize: '64px', marginBottom: '24px' }}>😔</div>
+                        <div style={{ fontSize: '64px', marginBottom: '24px' }}>✕</div>
                         <h2 style={{ marginBottom: '12px' }}>Ошибка</h2>
                         <p style={{ color: 'var(--text-secondary)' }}>{error}</p>
                         <Link href="/leaderboard" className="btn btn-primary" style={{ marginTop: '24px' }}>К лидерборду</Link>
@@ -132,8 +132,9 @@ export default function ProfilePage() {
                             <h1 className="player-username-large">{profile.username}</h1>
                             <div className="player-tags">
                                 {profile.tags && profile.tags.map((tag, idx) => {
-                                    if (tag.name === 'Админ') return <span key={idx} className="tag tag-admin">👑 {tag.name}</span>;
-                                    if (tag.name === '+') return <span key={idx} className="tag tag-sub">⭐ Подписка {tag.expiresIn && `(${tag.expiresIn})`}</span>;
+                                    if (tag.name === 'Админ') return <span key={idx} className="tag tag-admin">★ {tag.name}</span>;
+                                    if (tag.name === 'Модератор') return <span key={idx} className="tag tag-mod">◈ {tag.name}</span>;
+                                    if (tag.name === '+') return <span key={idx} className="tag tag-sub">◆ Подписка {tag.expiresIn && `(${tag.expiresIn})`}</span>;
                                     return <span key={idx} className="tag tag-org">{tag.name}</span>;
                                 })}
                             </div>
@@ -166,7 +167,7 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="info-card">
-                            <div className="info-title">📋 Информация</div>
+                            <div className="info-title">◉ Информация</div>
                             <div className="info-row">
                                 <span className="info-label">Первый вход</span>
                                 <span className="info-value">{formatDate(profile.firstJoin)}</span>
@@ -183,7 +184,7 @@ export default function ProfilePage() {
 
                         {profile.hasSubscription && (
                             <div className="info-card subscription-card">
-                                <div className="info-title">⭐ Подписка</div>
+                                <div className="info-title">◆ Подписка</div>
                                 <div className="info-row">
                                     <span className="info-label">Статус</span>
                                     <span className="subscription-active">Активна</span>
@@ -203,14 +204,14 @@ export default function ProfilePage() {
 
                         <div className="description-card">
                             <div className="description-header">
-                                <div className="info-title">📝 О себе</div>
+                                <div className="info-title">◇ О себе</div>
                                 {isOwnProfile && !isEditing && (
                                     <button
                                         onClick={() => setIsEditing(true)}
                                         className="edit-btn"
                                         title="Редактировать описание"
                                     >
-                                        ✏️
+                                        ✎
                                     </button>
                                 )}
                             </div>

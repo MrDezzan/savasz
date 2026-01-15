@@ -1950,6 +1950,11 @@ body {
   color: #1f1f1f;
 }
 
+.tag-mod {
+  background: linear-gradient(135deg, #3498DB, #2980B9);
+  color: white;
+}
+
 .tag-org {
   background: linear-gradient(135deg, var(--accent), var(--blue));
   color: white;

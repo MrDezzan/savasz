@@ -29,8 +29,8 @@ export default function Navbar() {
                     <div className="nav-links">
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
                         <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
-                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('📖 Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
-                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('🗺️ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
+                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◈ Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
+                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◇ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
                     </div>
 
                     {loading ? (
