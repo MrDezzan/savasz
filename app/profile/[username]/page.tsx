@@ -15,11 +15,11 @@ export default function ProfilePage({ params }: { params: { username: string } }
         // Using window.location to decodeURIComponent in case next params behavior is strict
         const decodedUsername = decodeURIComponent(params.username);
 
-        getProfile(decodedUsername).then((res) => {
-            if (res.success && res.profile) {
-                setProfile(res.profile);
+        getProfile(decodedUsername).then((p) => {
+            if (p) {
+                setProfile(p);
             } else {
-                setError(res.error || 'Игрок не найден');
+                setError('Игрок не найден');
             }
             setLoading(false);
         }).catch(() => {
