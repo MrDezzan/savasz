@@ -1,199 +1,176 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { getProfile, type PlayerProfile } from '@/lib/api';
-import { formatPlaytime, formatDate } from '@/lib/utils';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { getProfile, PlayerProfile } from '@/lib/api';
 
-export default function ProfilePage() {
-    const params = useParams();
-    const username = params.username as string;
+export default function ProfilePage({ params }: { params: { username: string } }) {
     const [profile, setProfile] = useState<PlayerProfile | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (username) {
-            setLoading(true);
-            getProfile(username)
-                .then((data) => {
-                    if (data) {
-                        setProfile(data);
-                    } else {
-                        setError(true);
-                    }
-                })
-                .catch(() => setError(true))
-                .finally(() => setLoading(false));
-        }
-    }, [username]);
+        setLoading(true);
+        // Using window.location to decodeURIComponent in case next params behavior is strict
+        const decodedUsername = decodeURIComponent(params.username);
+
+        getProfile(decodedUsername).then((res) => {
+            if (res.success && res.profile) {
+                setProfile(res.profile);
+            } else {
+                setError(res.error || 'Игрок не найден');
+            }
+            setLoading(false);
+        }).catch(() => {
+            setError('Ошибка загрузки профиля');
+            setLoading(false);
+        });
+    }, [params.username]);
+
+    const formatDate = (isoString: string) => {
+        return new Date(isoString).toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const formatLastSeen = (hours: number) => {
+        if (hours === 0) return 'Только что';
+        if (hours < 24) return `${hours} ч. назад`;
+        const days = Math.floor(hours / 24);
+        if (days === 1) return 'Вчера';
+        if (days < 7) return `${days} дн. назад`;
+        if (days < 30) return `${Math.floor(days / 7)} нед. назад`;
+        return `${Math.floor(days / 30)} мес. назад`;
+    };
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="loading-spinner" />
-            </div>
+            <section className="profile-page">
+                <div className="container">
+                    <div className="profile-loading">
+                        <div className="loading-spinner"></div>
+                        <p>Загрузка профиля...</p>
+                    </div>
+                </div>
+            </section>
         );
     }
 
     if (error || !profile) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center">
-                <p className="text-6xl mb-4">😔</p>
-                <h1 className="text-2xl font-bold text-white mb-2">Игрок не найден</h1>
-                <p className="text-slate-400 mb-6">Игрок &quot;{username}&quot; не существует</p>
-                <Link href="/leaderboard" className="btn-secondary">
-                    К таблице лидеров
-                </Link>
-            </div>
+            <section className="profile-page">
+                <div className="container">
+                    <div className="profile-error">
+                        <div style={{ fontSize: '64px', marginBottom: '24px' }}>😔</div>
+                        <h2 style={{ marginBottom: '12px' }}>Ошибка</h2>
+                        <p style={{ color: 'var(--text-secondary)' }}>{error}</p>
+                        <Link href="/leaderboard" className="btn btn-primary" style={{ marginTop: '24px' }}>К лидерборду</Link>
+                    </div>
+                </div>
+            </section>
         );
     }
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="container mx-auto px-4 max-w-4xl">
-                <Link href="/leaderboard" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Назад к статистике
-                </Link>
+        <section className="profile-page">
+            <div className="container">
+                <Link href="/leaderboard" className="back-link">← Вернуться к лидерборду</Link>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                    {/* Left - Avatar & Skin */}
-                    <div className="glass rounded-2xl p-6 text-center">
-                        <div className="relative inline-block mb-4">
-                            <img
-                                src={profile.skinUrl}
-                                alt=""
-                                className="w-40 h-80 mx-auto"
-                                style={{ imageRendering: 'pixelated' }}
-                            />
-                            <div className={`absolute top-2 right-2 w-3 h-3 rounded-full ${profile.isOnline ? 'bg-green-500' : 'bg-slate-500'
-                                }`} />
+                <div className="profile-container">
+                    <div className="profile-left">
+                        <div className="skin-card">
+                            <div className="skin-wrapper">
+                                <img
+                                    src={profile.skinUrl}
+                                    alt={profile.username}
+                                    className="skin-image"
+                                    onError={(e) => { e.currentTarget.src = 'https://mc-heads.net/body/MHF_Steve/200'; }}
+                                />
+                                <div className={`online-badge ${profile.isOnline ? '' : 'offline'}`}>
+                                    {profile.isOnline && <span className="online-dot"></span>}
+                                    {profile.isOnline ? 'Онлайн' : formatLastSeen(profile.hoursSinceLastSeen)}
+                                </div>
+                            </div>
+                            <h1 className="player-username-large">{profile.username}</h1>
+                            <div className="player-tags">
+                                {profile.tags && profile.tags.map((tag, idx) => {
+                                    if (tag.name === 'Админ') return <span key={idx} className="tag tag-admin">👑 {tag.name}</span>;
+                                    if (tag.name === '+') return <span key={idx} className="tag tag-sub">⭐ Подписка {tag.expiresIn && `(${tag.expiresIn})`}</span>;
+                                    return <span key={idx} className="tag tag-org">{tag.name}</span>;
+                                })}
+                            </div>
+
+                            {profile.discordId && (
+                                <div className="discord-info">
+                                    <svg className="discord-icon" viewBox="0 0 24 24">
+                                        <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02" />
+                                    </svg>
+                                    <span>Привязан к Discord</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="profile-right">
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-value">{profile.formattedPlaytime}</div>
+                                <div className="stat-label">Всего наиграно</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-value">{profile.monthPlaytimeFormatted || '0с'}</div>
+                                <div className="stat-label">За месяц</div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-value">{profile.weekPlaytimeFormatted || '0с'}</div>
+                                <div className="stat-label">За неделю</div>
+                            </div>
                         </div>
 
-                        <h1 className="text-2xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-                            {profile.username}
-                            {profile.hasSubscription && (
-                                <span className="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 border border-amber-500/50">
-                                    +
-                                </span>
-                            )}
-                        </h1>
-
-                        {/* Tags */}
-                        <div className="flex flex-wrap justify-center gap-2 mb-4">
-                            {profile.hasSubscription && (
-                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-yellow-400 to-amber-600 text-white shadow-lg shadow-amber-500/20">
-                                    ⭐ Sub
-                                </span>
-                            )}
-                            {profile.tags.map((tag, i) => (
-                                <span
-                                    key={i}
-                                    className="px-3 py-1 rounded-full text-sm font-semibold"
-                                    style={{ background: tag.color + '33', color: tag.color }}
-                                >
-                                    {tag.name}
-                                </span>
-                            ))}
+                        <div className="info-card">
+                            <div className="info-title">📋 Информация</div>
+                            <div className="info-row">
+                                <span className="info-label">Первый вход</span>
+                                <span className="info-value">{formatDate(profile.firstJoin)}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">Последний онлайн</span>
+                                <span className="info-value">{profile.isOnline ? 'Сейчас онлайн' : formatDate(profile.lastSeen)}</span>
+                            </div>
+                            <div className="info-row">
+                                <span className="info-label">Заходов на сервер</span>
+                                <span className="info-value">{profile.joinCount}</span>
+                            </div>
                         </div>
 
                         {profile.hasSubscription && (
-                            <div className="mb-4 text-amber-400 font-medium text-sm">
-                                ✨ Подписка активна
-                                {profile.subscriptionExpiry && profile.subscriptionExpiry !== 'ACTIVE' && (
-                                    <span className="block text-xs opacity-75">до {formatDate(profile.subscriptionExpiry)}</span>
-                                )}
+                            <div className="info-card subscription-card">
+                                <div className="info-title">⭐ Подписка</div>
+                                <div className="info-row">
+                                    <span className="info-label">Статус</span>
+                                    <span className="subscription-active">Активна</span>
+                                </div>
+                                <div className="info-row">
+                                    <span className="info-label">Действует</span>
+                                    <span className="info-value">
+                                        {profile.subscriptionExpires === 'permanent' ? 'Навсегда' : `до ${formatDate(profile.subscriptionExpires)}`}
+                                    </span>
+                                </div>
                             </div>
                         )}
 
-                        <p className={`text-sm ${profile.isOnline ? 'text-green-400' : 'text-slate-400'}`}>
-                            {profile.isOnline ? '🟢 Онлайн' : `Был ${formatDate(profile.lastSeen)}`}
-                        </p>
-                    </div>
-
-                    {/* Right - Stats */}
-                    <div className="md:col-span-2 space-y-6">
-                        {/* Playtime */}
-                        <div className="glass rounded-2xl p-6">
-                            <h2 className="text-lg font-semibold text-white mb-4">⏱️ Время в игре</h2>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="text-center">
-                                    <p className="text-2xl font-bold text-indigo-400">{formatPlaytime(profile.totalPlaytimeSeconds)}</p>
-                                    <p className="text-sm text-slate-400">Всего</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-2xl font-bold text-purple-400">{formatPlaytime(profile.monthlyPlaytime)}</p>
-                                    <p className="text-sm text-slate-400">За месяц</p>
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-2xl font-bold text-pink-400">{formatPlaytime(profile.weeklyPlaytime)}</p>
-                                    <p className="text-sm text-slate-400">За неделю</p>
-                                </div>
-                            </div>
+                        <div className="description-card">
+                            <div className="info-title">📝 О себе</div>
+                            <p className={`description-text ${profile.description ? '' : 'no-description'}`}>
+                                {profile.description || 'Пользователь пока не добавил описание'}
+                            </p>
                         </div>
-
-                        {/* Info */}
-                        <div className="glass rounded-2xl p-6">
-                            <h2 className="text-lg font-semibold text-white mb-4">📋 Информация</h2>
-                            <div className="space-y-3">
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Первый вход</span>
-                                    <span className="text-white">{formatDate(profile.firstJoin)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-slate-400">Заходов на сервер</span>
-                                    <span className="text-white">{profile.joinCount}</span>
-                                </div>
-                                {profile.discordId && (
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-400">Discord</span>
-                                        <span className="text-indigo-400">Привязан ✓</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Description */}
-                        {profile.description && (
-                            <div className="glass rounded-2xl p-6">
-                                <h2 className="text-lg font-semibold text-white mb-4">✏️ О себе</h2>
-                                <p className="text-slate-300 whitespace-pre-wrap">{profile.description}</p>
-                            </div>
-                        )}
-                        {/* Organization */}
-                        {profile.organization && (
-                            <Link
-                                href={`/orgs/${profile.organization.shortName}`}
-                                className="glass rounded-2xl p-6 block group hover:bg-white/5 transition-colors"
-                            >
-                                <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                                    🏢 Организация
-                                    <svg className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                </h2>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-lg bg-slate-800 flex items-center justify-center text-lg border border-white/10">
-                                        {profile.organization.bannerUrl ? (
-                                            <img src={profile.organization.bannerUrl} alt="" className="w-full h-full object-cover rounded-lg" />
-                                        ) : (
-                                            profile.organization.shortName.charAt(0).toUpperCase()
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-white text-lg">{profile.organization.fullName}</h3>
-                                        <p className="text-indigo-400 font-mono text-sm">@{profile.organization.shortName}</p>
-                                    </div>
-                                </div>
-                            </Link>
-                        )}
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     );
 }

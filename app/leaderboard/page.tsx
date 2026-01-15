@@ -1,119 +1,121 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { getLeaderboard, type LeaderboardPlayer } from '@/lib/api';
-import { formatPlaytime } from '@/lib/utils';
-
-type Period = 'all' | 'month' | 'week';
+import { getLeaderboard, LeaderboardEntry, LeaderboardPeriod } from '@/lib/api';
 
 export default function LeaderboardPage() {
-    const [players, setPlayers] = useState<LeaderboardPlayer[]>([]);
-    const [period, setPeriod] = useState<Period>('all');
+    const [period, setPeriod] = useState<LeaderboardPeriod>('ALL_TIME');
     const [loading, setLoading] = useState(true);
+    const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 
     useEffect(() => {
         setLoading(true);
-        const periodParam = period === 'all' ? undefined : period;
-        getLeaderboard(periodParam)
-            .then(setPlayers)
-            .catch(console.error)
-            .finally(() => setLoading(false));
+        getLeaderboard(period).then((data) => {
+            setEntries(data);
+            setLoading(false);
+        });
     }, [period]);
 
-    const periods: { key: Period; label: string }[] = [
-        { key: 'all', label: 'Всё время' },
-        { key: 'month', label: 'Месяц' },
-        { key: 'week', label: 'Неделя' },
-    ];
+    const formatPlaytime = (ms: number) => {
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}ч ${minutes}м`;
+    };
+
+    const getRankClass = (index: number) => {
+        switch (index) {
+            case 0: return 'gold';
+            case 1: return 'silver';
+            case 2: return 'bronze';
+            default: return 'normal';
+        }
+    };
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="container mx-auto px-4 max-w-4xl">
-                <h1 className="text-3xl md:text-4xl font-bold text-center mb-2">
-                    📊 Таблица лидеров
-                </h1>
-                <p className="text-slate-400 text-center mb-8">
-                    Топ игроков по времени в игре
-                </p>
+        <section className="leaderboard-page">
+            <div className="container">
+                <Link href="/" className="back-link">← Вернуться на главную</Link>
 
-                {/* Period Tabs */}
-                <div className="flex justify-center gap-2 mb-8">
-                    {periods.map((p) => (
-                        <button
-                            key={p.key}
-                            onClick={() => setPeriod(p.key)}
-                            className={`px-5 py-2.5 rounded-xl font-medium transition-all ${period === p.key
-                                    ? 'bg-indigo-500 text-white'
-                                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                                }`}
-                        >
-                            {p.label}
-                        </button>
-                    ))}
+                <div className="page-header">
+                    <h1 className="page-title">Топ игроков по <span className="accent">онлайну</span></h1>
+                    <p className="page-subtitle">Рейтинг игроков по времени, проведённому на сервере</p>
                 </div>
 
-                {/* Leaderboard */}
-                <div className="glass rounded-2xl overflow-hidden">
+                <div className="period-tabs">
+                    <button
+                        className={`period-tab ${period === 'ALL_TIME' ? 'active' : ''}`}
+                        onClick={() => setPeriod('ALL_TIME')}
+                    >
+                        За всё время
+                    </button>
+                    <button
+                        className={`period-tab ${period === 'SEASON' ? 'active' : ''}`}
+                        onClick={() => setPeriod('SEASON')}
+                    >
+                        Сезон
+                    </button>
+                    <button
+                        className={`period-tab ${period === 'MONTH' ? 'active' : ''}`}
+                        onClick={() => setPeriod('MONTH')}
+                    >
+                        Месяц
+                    </button>
+                    <button
+                        className={`period-tab ${period === 'WEEK' ? 'active' : ''}`}
+                        onClick={() => setPeriod('WEEK')}
+                    >
+                        Неделя
+                    </button>
+                </div>
+
+                <div id="leaderboard-container">
                     {loading ? (
-                        <div className="flex justify-center py-16">
-                            <div className="loading-spinner" />
+                        <div className="leaderboard-loading">
+                            <div className="loading-spinner"></div>
+                            <p>Загрузка лидерборда...</p>
                         </div>
-                    ) : players.length === 0 ? (
-                        <div className="text-center py-16 text-slate-400">
-                            Нет данных за этот период
+                    ) : entries.length === 0 ? (
+                        <div className="empty-state">
+                            <div className="empty-state-icon">📊</div>
+                            <p>Нет данных за этот период</p>
                         </div>
                     ) : (
-                        <div className="divide-y divide-white/5">
-                            {players.map((player, index) => (
-                                <Link
-                                    key={player.uuid}
-                                    href={`/profile/${player.username}`}
-                                    className="flex items-center gap-4 p-4 hover:bg-white/5 transition-colors group"
-                                >
-                                    {/* Rank */}
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-400' :
-                                            index === 1 ? 'bg-slate-400/20 text-slate-300' :
-                                                index === 2 ? 'bg-orange-500/20 text-orange-400' :
-                                                    'bg-slate-700/50 text-slate-400'
-                                        }`}>
+                        <div className="leaderboard-list">
+                            {entries.map((entry, index) => (
+                                <Link href={`/profile/${entry.username}`} key={entry.username} className={`leaderboard-item clickable ${entry.isOnline ? 'online' : ''}`}>
+                                    <div className={`rank-badge ${getRankClass(index)}`}>
                                         {index + 1}
                                     </div>
-
-                                    {/* Avatar */}
-                                    <img
-                                        src={`https://mc-heads.net/avatar/${player.username}/48`}
-                                        alt=""
-                                        className="w-12 h-12 rounded-xl"
-                                    />
-
-                                    {/* Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-white group-hover:text-indigo-400 transition-colors truncate">
-                                            {player.username}
-                                        </p>
-                                        <p className="text-sm text-slate-400">
-                                            {player.joinCount} заходов
-                                        </p>
+                                    <div className="player-avatar-large">
+                                        <img
+                                            src={`https://mc-heads.net/avatar/${entry.username}/56`}
+                                            alt={entry.username}
+                                            onError={(e) => { e.currentTarget.src = 'https://mc-heads.net/avatar/MHF_Steve/56'; }}
+                                        />
                                     </div>
-
-                                    {/* Playtime */}
-                                    <div className="text-right">
-                                        <p className="font-semibold text-indigo-400">
-                                            {formatPlaytime(player.totalPlaytimeSeconds)}
-                                        </p>
+                                    <div className="player-details">
+                                        <div className="player-username">
+                                            {entry.username}
+                                            {entry.isOnline && (
+                                                <span className="online-indicator">
+                                                    <span className="online-dot"></span>
+                                                    Онлайн
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="player-stats">
+                                            <span>Всего наиграно:</span>
+                                            <span className="player-playtime">{entry.formattedPlaytime}</span>
+                                        </div>
                                     </div>
-
-                                    {/* Arrow */}
-                                    <svg className="w-5 h-5 text-slate-600 group-hover:text-indigo-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    <div className="profile-arrow">→</div>
                                 </Link>
                             ))}
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     );
 }

@@ -2,184 +2,296 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { getFeed, createPost, validateSession, type FeedPost } from '@/lib/api';
-import { formatTimeAgo } from '@/lib/utils';
+
+// Define types locally since they might not be in api.ts yet or differ
+interface FeedPost {
+    id: number;
+    authorUsername: string;
+    content: string;
+    createdAt: string;
+    isAdmin: boolean;
+    hasSubscription: boolean;
+}
 
 export default function FeedPage() {
-    const router = useRouter();
+    const [currentUser, setCurrentUser] = useState<{ username: string; token: string } | null>(null);
     const [posts, setPosts] = useState<FeedPost[]>([]);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<{ username: string; token: string } | null>(null);
-    const [newPost, setNewPost] = useState('');
-    const [posting, setPosting] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [postContent, setPostContent] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
-        // Check auth
+        checkAuth();
+        loadPosts(0);
+    }, []);
+
+    const checkAuth = async () => {
         const token = localStorage.getItem('sylvaire_token');
         const username = localStorage.getItem('sylvaire_username');
 
         if (token && username) {
-            validateSession(token).then((data) => {
-                if (data.valid) {
-                    setUser({ username: data.username || username, token });
+            try {
+                const res = await fetch('/api/auth/session', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success && data.valid) {
+                    setCurrentUser({ username: data.username, token });
+                    checkAdminStatus(data.username);
+                } else {
+                    localStorage.removeItem('sylvaire_token');
+                    localStorage.removeItem('sylvaire_username');
                 }
-            });
-        }
-
-        // Load posts
-        loadPosts(0);
-    }, []);
-
-    const loadPosts = async (pageNum: number, append = false) => {
-        setLoading(true);
-        try {
-            const data = await getFeed(pageNum);
-            if (append) {
-                setPosts((prev) => [...prev, ...data.posts]);
-            } else {
-                setPosts(data.posts);
+            } catch (e) {
+                // Ignore error
             }
-            setHasMore(data.hasMore);
-            setPage(pageNum);
-        } catch (err) {
-            console.error(err);
         }
-        setLoading(false);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!user || !newPost.trim() || posting) return;
+    const checkAdminStatus = async (username: string) => {
+        try {
+            const res = await fetch(`/api/profile/${username}`);
+            const data = await res.json();
+            if (data.success && data.profile.tags) {
+                if (data.profile.tags.some((t: any) => t.name === 'Админ')) {
+                    setIsAdmin(true);
+                }
+            }
+        } catch (e) { }
+    };
 
-        setPosting(true);
-        const result = await createPost(newPost.trim(), user.token);
+    const loadPosts = async (pageNum: number, append = false) => {
+        if (!append) setLoading(true);
+        try {
+            const res = await fetch(`/api/feed?page=${pageNum}`);
+            const data = await res.json();
 
-        if (result.success) {
-            setNewPost('');
-            loadPosts(0);
-        } else {
-            alert(result.error || 'Ошибка публикации');
+            if (data.success) {
+                if (append) {
+                    setPosts(prev => [...prev, ...data.posts]);
+                } else {
+                    setPosts(data.posts);
+                }
+                setHasMore(data.hasMore);
+            }
+        } catch (e) {
+            console.error('Failed to load posts');
+        } finally {
+            setLoading(false);
         }
-        setPosting(false);
+    };
+
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        loadPosts(nextPage, true);
+    };
+
+    const handleSubmitPost = async () => {
+        if (!currentUser || !postContent.trim()) return;
+
+        setSubmitting(true);
+        try {
+            const res = await fetch('/api/posts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser.token}`
+                },
+                body: JSON.stringify({ content: postContent })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setPostContent('');
+                setPage(0);
+                loadPosts(0, false);
+            } else {
+                alert(data.error || 'Ошибка публикации');
+            }
+        } catch (e) {
+            alert('Ошибка соединения');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDeletePost = async (postId: number) => {
+        if (!isAdmin || !currentUser) return;
+        if (!confirm('Удалить эту публикацию?')) return;
+
+        try {
+            const res = await fetch(`/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${currentUser.token}` }
+            });
+
+            if (res.ok) {
+                setPosts(posts.filter(p => p.id !== postId));
+            }
+        } catch (e) { }
+    };
+
+    const formatTimeAgo = (isoString: string) => {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (diff < 60) return 'только что';
+        if (diff < 3600) return Math.floor(diff / 60) + ' мин. назад';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' ч. назад';
+        if (diff < 604800) return Math.floor(diff / 86400) + ' дн. назад';
+        return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    };
+
+    const handleBanUser = () => {
+        if (!currentUser) return;
+        const username = prompt('Введите никнейм для блокировки:');
+        if (!username) return;
+        const duration = prompt('Длительность в минутах (пусто = навсегда):');
+        const reason = prompt('Причина:');
+
+        fetch('/api/bans', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
+        }).then(res => {
+            if (res.ok) alert('Пользователь заблокирован');
+        });
+    };
+
+    const handleMuteUser = () => {
+        if (!currentUser) return;
+        const username = prompt('Введите никнейм для мута:');
+        if (!username) return;
+        const duration = prompt('Длительность в минутах (пусто = навсегда):');
+        const reason = prompt('Причина:');
+
+        fetch('/api/mutes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentUser.token}`
+            },
+            body: JSON.stringify({ username, duration: duration ? parseInt(duration) : null, reason })
+        }).then(res => {
+            if (res.ok) alert('Пользователь замучен');
+        });
     };
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="container mx-auto px-4 max-w-2xl">
-                <h1 className="text-3xl font-bold text-center mb-2">💬 Лента сообщества</h1>
-                <p className="text-slate-400 text-center mb-8">Что нового в Sylvaire</p>
-
-                {/* Create Post */}
-                {user ? (
-                    <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 mb-6">
-                        <div className="flex items-start gap-4">
-                            <img
-                                src={`https://mc-heads.net/avatar/${user.username}/48`}
-                                alt=""
-                                className="w-12 h-12 rounded-xl"
-                            />
-                            <div className="flex-1">
-                                <textarea
-                                    value={newPost}
-                                    onChange={(e) => setNewPost(e.target.value)}
-                                    placeholder="Что нового?"
-                                    maxLength={2000}
-                                    className="w-full min-h-[100px] bg-slate-800/50 border border-white/10 rounded-xl p-4 text-white placeholder-slate-500 resize-none focus:border-indigo-500 focus:outline-none"
-                                />
-                                <div className="flex justify-between items-center mt-3">
-                                    <span className={`text-sm ${newPost.length > 1800 ? 'text-red-400' : 'text-slate-500'}`}>
-                                        {newPost.length}/2000
-                                    </span>
-                                    <button
-                                        type="submit"
-                                        disabled={!newPost.trim() || posting}
-                                        className="btn-primary px-6 py-2 disabled:opacity-50"
-                                    >
-                                        {posting ? 'Публикация...' : 'Опубликовать'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                ) : (
-                    <div className="glass rounded-2xl p-8 text-center mb-6">
-                        <h3 className="text-lg font-semibold text-white mb-2">Присоединяйтесь к обсуждению</h3>
-                        <p className="text-slate-400 mb-4">Войдите, чтобы публиковать сообщения</p>
-                        <Link href="/login" className="btn-primary inline-block">
-                            Войти через Discord
-                        </Link>
+        <section className="feed-page">
+            <div className="container">
+                <div className="feed-container">
+                    <div className="feed-header">
+                        <h1 className="feed-title">Лента сообщества</h1>
+                        <Link href="/" className="back-link">← На главную</Link>
                     </div>
-                )}
 
-                {/* Posts */}
-                <div className="space-y-4">
-                    {loading && posts.length === 0 ? (
-                        <div className="flex justify-center py-12">
-                            <div className="loading-spinner" />
-                        </div>
-                    ) : posts.length === 0 ? (
-                        <div className="glass rounded-2xl p-12 text-center">
-                            <p className="text-4xl mb-4">📝</p>
-                            <h3 className="text-xl font-semibold text-white mb-2">Пока нет публикаций</h3>
-                            <p className="text-slate-400">Станьте первым!</p>
+                    {!currentUser ? (
+                        <div className="login-prompt">
+                            <h3>👋 Присоединяйтесь к обсуждению</h3>
+                            <p>Войдите в аккаунт, чтобы публиковать сообщения</p>
+                            <Link href="/login" className="btn">Войти через Discord</Link>
                         </div>
                     ) : (
-                        posts.map((post) => (
-                            <article key={post.id} className="glass rounded-2xl p-6 animate-fade-in">
-                                <div className="flex items-start gap-4">
-                                    <Link href={`/profile/${post.authorUsername}`}>
-                                        <img
-                                            src={`https://mc-heads.net/avatar/${post.authorUsername}/48`}
-                                            alt=""
-                                            className="w-12 h-12 rounded-xl hover:scale-105 transition-transform"
-                                        />
-                                    </Link>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <Link
-                                                href={`/profile/${post.authorUsername}`}
-                                                className="font-semibold text-white hover:text-indigo-400 transition-colors"
-                                            >
-                                                {post.authorUsername}
-                                            </Link>
-                                            {post.isAdmin && (
-                                                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full">
-                                                    Админ
-                                                </span>
-                                            )}
-                                            {post.hasSubscription && (
-                                                <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">
-                                                    +
-                                                </span>
-                                            )}
-                                            <span className="text-slate-500 text-sm">
-                                                · {formatTimeAgo(post.createdAt)}
-                                            </span>
-                                        </div>
-                                        <p className="text-slate-300 whitespace-pre-wrap break-words">
-                                            {post.content}
-                                        </p>
-                                    </div>
+                        <div className="create-post-card">
+                            <div className="create-post-header">
+                                <div className="user-avatar-small">
+                                    <img src={`https://mc-heads.net/avatar/${currentUser.username}/88`} alt={currentUser.username} />
                                 </div>
-                            </article>
-                        ))
+                                <div className="user-info-small">
+                                    <span className="user-name-small">{currentUser.username}</span>
+                                </div>
+                            </div>
+                            <textarea
+                                className="create-textarea"
+                                placeholder="Что нового?"
+                                maxLength={2000}
+                                value={postContent}
+                                onChange={(e) => setPostContent(e.target.value)}
+                            />
+                            <div className="create-footer">
+                                <span className={`char-count ${postContent.length > 1800 ? 'danger' : postContent.length > 1500 ? 'warning' : ''}`}>
+                                    {postContent.length}/2000
+                                </span>
+                                <button
+                                    className="post-btn"
+                                    onClick={handleSubmitPost}
+                                    disabled={submitting || !postContent.trim()}
+                                >
+                                    {submitting ? 'Публикация...' : 'Опубликовать'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {isAdmin && (
+                        <div className="admin-panel visible">
+                            <div className="admin-panel-title">🛡️ Панель модерации</div>
+                            <div className="admin-actions">
+                                <button className="admin-btn" onClick={handleBanUser}>Заблокировать пользователя</button>
+                                <button className="admin-btn" onClick={handleMuteUser}>Замутить пользователя</button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div id="posts-container">
+                        {loading && page === 0 ? (
+                            <div className="feed-loading">
+                                <div className="loading-spinner"></div>
+                                <p>Загрузка публикаций...</p>
+                            </div>
+                        ) : posts.length === 0 ? (
+                            <div className="feed-empty">
+                                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
+                                <h3>Пока нет публикаций</h3>
+                                <p style={{ color: 'var(--text-secondary)' }}>Станьте первым, кто опубликует сообщение!</p>
+                            </div>
+                        ) : (
+                            posts.map(post => (
+                                <div className="post-card" key={post.id}>
+                                    <div className="post-header">
+                                        <div className="post-author">
+                                            <Link href={`/profile/${post.authorUsername}`} className="post-avatar">
+                                                <img src={`https://mc-heads.net/avatar/${post.authorUsername}/96`} alt={post.authorUsername} />
+                                            </Link>
+                                            <div className="post-author-info">
+                                                <span className="post-author-name">
+                                                    <Link href={`/profile/${post.authorUsername}`}>
+                                                        {post.authorUsername}
+                                                    </Link>
+                                                    {post.isAdmin && <span className="admin-tag">Админ</span>}
+                                                    {post.hasSubscription && <span className="sub-tag">+</span>}
+                                                </span>
+                                                <span className="post-time">{formatTimeAgo(post.createdAt)}</span>
+                                            </div>
+                                        </div>
+                                        {isAdmin && (
+                                            <div className="post-actions">
+                                                <button className="post-action-btn" onClick={() => handleDeletePost(post.id)}>🗑️ Удалить</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="post-content">{post.content}</div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {hasMore && !loading && (
+                        <button className="load-more-btn" onClick={handleLoadMore}>
+                            Загрузить ещё
+                        </button>
                     )}
                 </div>
-
-                {/* Load More */}
-                {hasMore && (
-                    <button
-                        onClick={() => loadPosts(page + 1, true)}
-                        disabled={loading}
-                        className="w-full mt-6 py-4 glass rounded-xl text-slate-400 hover:text-white transition-colors"
-                    >
-                        {loading ? 'Загрузка...' : 'Загрузить ещё'}
-                    </button>
-                )}
             </div>
-        </div>
+        </section>
     );
 }
