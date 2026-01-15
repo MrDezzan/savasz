@@ -16,11 +16,9 @@ export default function SkinViewer({ skinUrl, width = 300, height = 400 }: SkinV
             height={height}
             width={width}
             onReady={({ viewer }) => {
-                // Set animation to walking
-                if (viewer.animations) {
-                    viewer.animation = viewer.animations.run;
-                    viewer.animation.speed = 0.5;
-                }
+                // Enable auto-rotate for a dynamic look
+                viewer.autoRotate = true;
+                viewer.autoRotateSpeed = 1;
             }}
             options={{
                 zoom: 0.9,
