@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   title: "Sylvaire — Политический RP Minecraft сервер",
   description: "Уникальный Minecraft сервер с политической ролевой игрой, организациями и социальной сетью",
   keywords: ["minecraft", "сервер", "rp", "ролевая игра", "политика", "sylvaire"],
+  icons: {
+    icon: "/assets/logo.png",
+    shortcut: "/assets/logo.png",
+    apple: "/assets/logo.png",
+  },
 };
 
 export default function RootLayout({
