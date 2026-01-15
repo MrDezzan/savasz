@@ -49,12 +49,7 @@ export default function LeaderboardPage() {
                     >
                         За всё время
                     </button>
-                    <button
-                        className={`period-tab ${period === 'SEASON' ? 'active' : ''}`}
-                        onClick={() => setPeriod('SEASON')}
-                    >
-                        Сезон
-                    </button>
+
                     <button
                         className={`period-tab ${period === 'MONTH' ? 'active' : ''}`}
                         onClick={() => setPeriod('MONTH')}

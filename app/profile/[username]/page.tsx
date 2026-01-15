@@ -172,7 +172,7 @@ export default function ProfilePage() {
                                 {profile.tags && profile.tags.map((tag, idx) => {
                                     if (tag.name === 'Админ') return <span key={idx} className="tag tag-admin">★ {tag.name}</span>;
                                     if (tag.name === 'Модератор') return <span key={idx} className="tag tag-mod">◈ {tag.name}</span>;
-                                    if (tag.name === '+') return <span key={idx} className="tag tag-sub">◆ Подписка {tag.expiresIn && `(${tag.expiresIn})`}</span>;
+                                    if (tag.name === '+') return <span key={idx} className="tag tag-sub">◆ Подписка</span>; // Removed expiry from tag
                                     return <span key={idx} className="tag tag-org">{tag.name}</span>;
                                 })}
                             </div>
@@ -310,10 +310,6 @@ export default function ProfilePage() {
                                 <div className="stat-label">Всего наиграно</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-value">{profile.monthPlaytimeFormatted || '0с'}</div>
-                                <div className="stat-label">За месяц</div>
-                            </div>
-                            <div className="stat-card">
                                 <div className="stat-value">{profile.weekPlaytimeFormatted || '0с'}</div>
                                 <div className="stat-label">За неделю</div>
                             </div>
@@ -344,12 +340,8 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="info-row">
                                     <span className="info-label">Действует</span>
-                                    <span className="info-value">
-                                        {profile.subscriptionExpires === 'permanent'
-                                            ? 'Навсегда'
-                                            : profile.subscriptionExpires
-                                                ? `до ${formatDate(profile.subscriptionExpires)}`
-                                                : 'Активна'}
+                                    <span style={{ color: '#ffd700', fontWeight: 600 }}>
+                                        {profile.subscriptionExpiry || 'Активна'}
                                     </span>
                                 </div>
                             </div>
