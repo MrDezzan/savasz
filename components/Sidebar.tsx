@@ -108,24 +108,14 @@ export default function Sidebar() {
                     {/* Bottom actions */}
                     <div className="sidebar-bottom">
                         {user ? (
-                            <>
-                                <Link
-                                    href="/settings"
-                                    className={`sidebar-item ${pathname === '/settings' ? 'active' : ''}`}
-                                    title="Настройки"
-                                >
-                                    <IconSettings size={24} />
-                                    <span className="sidebar-tooltip">Настройки</span>
-                                </Link>
-                                <button
-                                    onClick={logout}
-                                    className="sidebar-item sidebar-logout"
-                                    title="Выйти"
-                                >
-                                    <IconLogout size={24} />
-                                    <span className="sidebar-tooltip">Выйти</span>
-                                </button>
-                            </>
+                            <button
+                                onClick={logout}
+                                className="sidebar-item sidebar-logout"
+                                title="Выйти"
+                            >
+                                <IconLogout size={24} />
+                                <span className="sidebar-tooltip">Выйти</span>
+                            </button>
                         ) : (
                             <Link
                                 href="/login"

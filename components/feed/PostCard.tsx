@@ -28,10 +28,18 @@ export default function PostCard({ post, onLike, onComment, showComments = true 
     };
 
     const formatTimeAgo = (isoString: string) => {
-        const date = new Date(isoString);
+        // Backend returns time without timezone (e.g., "2026-01-16T14:30:00")
+        // Server is in UTC+5, so append timezone if not present
+        let dateStr = isoString;
+        if (isoString.includes('T') && !isoString.includes('Z') && !isoString.includes('+') && !isoString.includes('-', 10)) {
+            dateStr = isoString + '+05:00';
+        }
+
+        const date = new Date(dateStr);
         const now = new Date();
         const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
+        if (diff < 0) return 'только что';
         if (diff < 60) return 'только что';
         if (diff < 3600) return Math.floor(diff / 60) + ' мин.';
         if (diff < 86400) return Math.floor(diff / 3600) + ' ч.';
