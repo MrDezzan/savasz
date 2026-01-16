@@ -13,6 +13,8 @@ import {
     IconSettings,
     IconLogout,
     IconAlert,
+    IconLogs,
+    IconComment,
 } from '@/components/ui/icons';
 
 interface NavItem {
@@ -20,33 +22,48 @@ interface NavItem {
     icon: React.FC<{ size?: number; className?: string }>;
     label: string;
     requiresAuth?: boolean;
+    requiresAdmin?: boolean;
     showBadge?: boolean;
 }
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
-    const [hasNotifications] = useState(false); // TODO: connect to notifications context
+    const { user, logout, isAdmin } = useAuth();
+    const [hasNotifications] = useState(false);
+
+    // Определяем, находимся ли мы на внешних страницах (landing, leaderboard)
+    const isExternalPage = pathname === '/' || pathname.startsWith('/leaderboard');
 
     const navItems: NavItem[] = [
-        { href: '/', icon: IconHome, label: 'Лента' },
+        { href: '/forum', icon: IconComment, label: 'Форум' },
         { href: '/alliances', icon: IconAlliance, label: 'Альянсы' },
         { href: '/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
         { href: '/notifications', icon: IconBell, label: 'Уведомления', requiresAuth: true, showBadge: hasNotifications },
         { href: user ? `/profile/${user.username}` : '/login', icon: IconUser, label: 'Профиль' },
     ];
 
+    // Кнопка логов только для админов
+    const adminItems: NavItem[] = [
+        { href: '/admin/logs', icon: IconLogs, label: 'Логи', requiresAdmin: true },
+    ];
+
     const isActive = (href: string) => {
-        if (href === '/') return pathname === '/';
+        if (href === '/forum') return pathname === '/forum' || pathname.startsWith('/forum');
+        if (href === '/leaderboard') return pathname.startsWith('/leaderboard');
         return pathname.startsWith(href);
     };
+
+    // На внешних страницах не показываем sidebar
+    if (isExternalPage) {
+        return null;
+    }
 
     return (
         <>
             {/* Desktop Sidebar */}
             <aside className="sidebar">
                 <div className="sidebar-content">
-                    {/* Logo */}
+                    {/* Logo - всегда ведёт на главную внешнюю страницу */}
                     <Link href="/" className="sidebar-logo">
                         <img src="/assets/logo.png" alt="Sylvaire" />
                     </Link>
@@ -54,7 +71,6 @@ export default function Sidebar() {
                     {/* Navigation */}
                     <nav className="sidebar-nav">
                         {navItems.map((item) => {
-                            // Skip auth-required items if not logged in
                             if (item.requiresAuth && !user) return null;
 
                             const Icon = item.icon;
@@ -73,6 +89,24 @@ export default function Sidebar() {
                                             <IconAlert size={10} />
                                         </span>
                                     )}
+                                    <span className="sidebar-tooltip">{item.label}</span>
+                                </Link>
+                            );
+                        })}
+
+                        {/* Admin items */}
+                        {isAdmin && adminItems.map((item) => {
+                            const Icon = item.icon;
+                            const active = isActive(item.href);
+
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`sidebar-item admin-item ${active ? 'active' : ''}`}
+                                    title={item.label}
+                                >
+                                    <Icon size={24} />
                                     <span className="sidebar-tooltip">{item.label}</span>
                                 </Link>
                             );

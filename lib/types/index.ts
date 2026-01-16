@@ -2,3 +2,4 @@
 export * from './feed';
 export * from './alliance';
 export * from './notifications';
+export * from './logs';

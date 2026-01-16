@@ -24,6 +24,7 @@ interface AuthContextType {
     refreshAuth: () => Promise<void>;
     refreshTags: () => Promise<void>;
     canManageTags: boolean;
+    isAdmin: boolean;
 }
 
 const DEFAULT_TAGS: UserTags = {
@@ -181,6 +182,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Проверка права управления тегами
     const canManageTags = user ? (TAG_MANAGERS.includes(user.username) || (userTags?.isAdmin ?? false)) : false;
 
+    // Прямой доступ к isAdmin
+    const isAdmin = userTags?.isAdmin ?? false;
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -190,7 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             logout,
             refreshAuth,
             refreshTags,
-            canManageTags
+            canManageTags,
+            isAdmin,
         }}>
             {children}
         </AuthContext.Provider>

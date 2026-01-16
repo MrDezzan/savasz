@@ -145,14 +145,25 @@ export const IconDiscord: React.FC<IconProps> = ({ size = 24, className }) => (
     </svg>
 );
 
-// Leaderboard / Trophy Icon
+// Leaderboard / Trophy Icon - Symmetrical
 export const IconTrophy: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 22V8a6 6 0 1 0 12 0v14" />
-        <path d="M12 17v5" />
+        <path d="M6 9H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h2" />
+        <path d="M18 9h2a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-2" />
+        <path d="M6 2h12v9a6 6 0 0 1-12 0V2z" />
+        <path d="M12 17v4" />
+        <path d="M8 21h8" />
+    </svg>
+);
+
+// Logs / File Text Icon
+export const IconLogs: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14,2 14,8 20,8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <line x1="10" y1="9" x2="8" y2="9" />
     </svg>
 );
 
@@ -302,6 +313,7 @@ export const Icons = {
     Ban: IconBan,
     Discord: IconDiscord,
     Trophy: IconTrophy,
+    Logs: IconLogs,
     Menu: IconMenu,
     ArrowLeft: IconArrowLeft,
     ArrowRight: IconArrowRight,
