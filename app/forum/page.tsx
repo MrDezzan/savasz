@@ -48,7 +48,7 @@ export default function ForumPage() {
     const handleCreatePost = async (content: string, imageUrl?: string) => {
         if (!user) return;
 
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('sylvaire_token');
         if (!token) {
             console.error('[Forum] No auth token found');
             return;
