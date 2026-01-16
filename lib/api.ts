@@ -26,10 +26,11 @@ export async function api<T>(endpoint: string, options: FetchOptions = {}): Prom
         try {
             const errorBody = await response.json();
             if (errorBody && errorBody.error) {
+                // Use the server's error message directly
                 errorMessage = errorBody.error;
             }
         } catch (e) {
-            // Ignore JSON parse error, use status code
+            // Ignore JSON parse error, use default status message
         }
         throw new Error(errorMessage);
     }
