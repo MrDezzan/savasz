@@ -7,6 +7,8 @@ interface LogoConstructorProps {
     onSave: (svgString: string) => void;
     onCancel: () => void;
     initialSvg?: string;
+    error?: string | null;
+    isSubmitting?: boolean;
 }
 
 // Minecraft-style color palette
@@ -21,7 +23,7 @@ const COLORS = [
 
 const GRID_SIZE = 16;
 
-export default function LogoConstructor({ onSave, onCancel, initialSvg }: LogoConstructorProps) {
+export default function LogoConstructor({ onSave, onCancel, initialSvg, error, isSubmitting }: LogoConstructorProps) {
     const [grid, setGrid] = useState<(string | null)[][]>(() => {
         // Initialize empty grid
         return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
@@ -157,20 +159,34 @@ export default function LogoConstructor({ onSave, onCancel, initialSvg }: LogoCo
                 </div>
 
                 <div className="logo-constructor-footer">
-                    <button className="logo-btn secondary" onClick={handleClear}>
+                    {error && (
+                        <div className="logo-error-message" style={{ color: '#ef4444', marginBottom: '10px', fontSize: '14px', textAlign: 'center', width: '100%' }}>
+                            {error}
+                        </div>
+                    )}
+                    <button className="logo-btn secondary" onClick={handleClear} disabled={isSubmitting}>
                         <IconTrash size={16} />
                         Очистить
                     </button>
                     <div className="footer-right">
-                        <button className="logo-btn secondary" onClick={onCancel}>
+                        <button className="logo-btn secondary" onClick={onCancel} disabled={isSubmitting}>
                             Отмена
                         </button>
                         <button
                             className="logo-btn primary"
                             onClick={handleSave}
-                            disabled={!hasContent}
+                            disabled={!hasContent || isSubmitting}
                         >
-                            <IconCheck size={16} />
+                            {isSubmitting ? (
+                                <span className="loading-spinner-wrapper" style={{ marginRight: '8px' }}>
+                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </span>
+                            ) : (
+                                <IconCheck size={16} />
+                            )}
                             Сохранить
                         </button>
                     </div>

@@ -93,6 +93,8 @@ export default function CreateAlliancePage() {
             <LogoConstructor
                 onSave={handleLogoSave}
                 onCancel={handleLogoCancel}
+                error={error}
+                isSubmitting={isSubmitting}
             />
         );
     }

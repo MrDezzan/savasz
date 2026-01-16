@@ -22,7 +22,16 @@ export async function api<T>(endpoint: string, options: FetchOptions = {}): Prom
     });
 
     if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        let errorMessage = `API Error: ${response.status}`;
+        try {
+            const errorBody = await response.json();
+            if (errorBody && errorBody.error) {
+                errorMessage = errorBody.error;
+            }
+        } catch (e) {
+            // Ignore JSON parse error, use status code
+        }
+        throw new Error(errorMessage);
     }
 
     return response.json();
@@ -225,7 +234,8 @@ export interface AllianceData {
     fullName: string;
     description?: string;
     bannerUrl?: string;
-    creator: string;
+    leaderUsername: string;
+    createdBy: string;
     memberCount?: number;
     createdAt?: string;
 }

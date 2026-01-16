@@ -28,7 +28,7 @@ export default function AlliancesPage() {
                     description: a.description || '',
                     logoSvg: '',
                     color: '#6366f1',
-                    leaderUsername: a.creator,
+                    leaderUsername: a.leaderUsername,
                     memberCount: a.memberCount || 1,
                     createdAt: a.createdAt || new Date().toISOString(),
                     recruitmentStatus: 'OPEN' as const,
