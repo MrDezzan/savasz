@@ -8,6 +8,7 @@ export default function Navbar() {
     const { user, loading, logout } = useAuth();
     const [notification, setNotification] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const showNotification = (msg: string) => {
         setNotification(msg);
@@ -19,6 +20,10 @@ export default function Navbar() {
         setShowUserMenu(false);
     };
 
+    const closeMobileMenu = () => {
+        setMobileMenuOpen(false);
+    };
+
     return (
         <>
             <nav className="navbar">
@@ -26,6 +31,8 @@ export default function Navbar() {
                     <Link href="/" className="nav-logo">
                         <img src="/assets/logo.png" alt="Sylvaire" className="w-10 h-10 object-contain" />
                     </Link>
+
+                    {/* Desktop Navigation */}
                     <div className="nav-links">
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
                         <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
@@ -33,92 +40,166 @@ export default function Navbar() {
                         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◇ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
                     </div>
 
-                    {loading ? (
-                        <div className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>...</div>
-                    ) : user ? (
-                        <div className="nav-user-menu" style={{ position: 'relative' }}>
-                            <button
-                                className="nav-btn"
-                                onClick={() => setShowUserMenu(!showUserMenu)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                            >
+                    {/* Desktop Login Button */}
+                    <div className="nav-auth-desktop">
+                        {loading ? (
+                            <div className="nav-btn" style={{ opacity: 0.5, cursor: 'default' }}>...</div>
+                        ) : user ? (
+                            <div className="nav-user-menu" style={{ position: 'relative' }}>
+                                <button
+                                    className="nav-btn"
+                                    onClick={() => setShowUserMenu(!showUserMenu)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                                >
+                                    <img
+                                        src={`https://mc-heads.net/avatar/${user.username}/24`}
+                                        alt=""
+                                        style={{ width: '24px', height: '24px', borderRadius: '4px' }}
+                                    />
+                                    {user.username}
+                                </button>
+                                {showUserMenu && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 'calc(100% + 8px)',
+                                        right: 0,
+                                        background: 'rgba(15, 23, 42, 0.98)',
+                                        backdropFilter: 'blur(20px)',
+                                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                                        borderRadius: '12px',
+                                        padding: '8px',
+                                        minWidth: '160px',
+                                        zIndex: 1000,
+                                        boxShadow: '0 10px 40px rgba(0,0,0,0.4)'
+                                    }}>
+                                        <Link
+                                            href={`/profile/${user.username}`}
+                                            className="nav-dropdown-item"
+                                            onClick={() => setShowUserMenu(false)}
+                                            style={{
+                                                display: 'block',
+                                                padding: '10px 14px',
+                                                color: 'white',
+                                                textDecoration: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            👤 Мой профиль
+                                        </Link>
+                                        <Link
+                                            href="/feed"
+                                            className="nav-dropdown-item"
+                                            onClick={() => setShowUserMenu(false)}
+                                            style={{
+                                                display: 'block',
+                                                padding: '10px 14px',
+                                                color: 'white',
+                                                textDecoration: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            📰 Лента
+                                        </Link>
+                                        <div style={{ height: '1px', background: 'rgba(99, 102, 241, 0.2)', margin: '8px 0' }} />
+                                        <button
+                                            onClick={handleLogout}
+                                            style={{
+                                                display: 'block',
+                                                width: '100%',
+                                                padding: '10px 14px',
+                                                color: '#f87171',
+                                                background: 'none',
+                                                border: 'none',
+                                                textAlign: 'left',
+                                                borderRadius: '8px',
+                                                fontSize: '14px',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            🚪 Выйти
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <Link href="/login" className="nav-btn">Войти</Link>
+                        )}
+                    </div>
+
+                    {/* Mobile: Login Button and Burger Menu */}
+                    <div className="nav-mobile-actions">
+                        {!loading && !user && (
+                            <Link href="/login" className="nav-btn-mobile">Войти</Link>
+                        )}
+                        {!loading && user && (
+                            <div className="nav-user-avatar-mobile">
                                 <img
                                     src={`https://mc-heads.net/avatar/${user.username}/24`}
-                                    alt=""
-                                    style={{ width: '24px', height: '24px', borderRadius: '4px' }}
+                                    alt={user.username}
+                                    style={{ width: '32px', height: '32px', borderRadius: '8px' }}
                                 />
-                                {user.username}
-                            </button>
-                            {showUserMenu && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: 'calc(100% + 8px)',
-                                    right: 0,
-                                    background: 'rgba(15, 23, 42, 0.98)',
-                                    backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(99, 102, 241, 0.3)',
-                                    borderRadius: '12px',
-                                    padding: '8px',
-                                    minWidth: '160px',
-                                    zIndex: 1000,
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.4)'
-                                }}>
-                                    <Link
-                                        href={`/profile/${user.username}`}
-                                        className="nav-dropdown-item"
-                                        onClick={() => setShowUserMenu(false)}
-                                        style={{
-                                            display: 'block',
-                                            padding: '10px 14px',
-                                            color: 'white',
-                                            textDecoration: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '14px'
-                                        }}
-                                    >
-                                        👤 Мой профиль
-                                    </Link>
-                                    <Link
-                                        href="/feed"
-                                        className="nav-dropdown-item"
-                                        onClick={() => setShowUserMenu(false)}
-                                        style={{
-                                            display: 'block',
-                                            padding: '10px 14px',
-                                            color: 'white',
-                                            textDecoration: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '14px'
-                                        }}
-                                    >
-                                        📰 Лента
-                                    </Link>
-                                    <div style={{ height: '1px', background: 'rgba(99, 102, 241, 0.2)', margin: '8px 0' }} />
-                                    <button
-                                        onClick={handleLogout}
-                                        style={{
-                                            display: 'block',
-                                            width: '100%',
-                                            padding: '10px 14px',
-                                            color: '#f87171',
-                                            background: 'none',
-                                            border: 'none',
-                                            textAlign: 'left',
-                                            borderRadius: '8px',
-                                            fontSize: '14px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        🚪 Выйти
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <Link href="/login" className="nav-btn">Войти</Link>
-                    )}
+                            </div>
+                        )}
+                        <button
+                            className={`burger-menu ${mobileMenuOpen ? 'open' : ''}`}
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            aria-label="Menu"
+                        >
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                    </div>
                 </div>
             </nav>
+
+            {/* Mobile Menu Overlay */}
+            <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={closeMobileMenu} />
+
+            {/* Mobile Menu Panel */}
+            <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+                <div className="mobile-menu-content">
+                    <Link href="/leaderboard" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <span className="mobile-nav-icon">◈</span>
+                        Статистика
+                    </Link>
+                    <a href="https://shop.sylvaire.ru" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <span className="mobile-nav-icon">◇</span>
+                        Магазин
+                    </a>
+                    <a href="#" className="mobile-nav-link" onClick={(e) => { e.preventDefault(); showNotification('◈ Вики пока недоступно. Следите за обновлениями в Discord!'); closeMobileMenu(); }}>
+                        <span className="mobile-nav-icon">◈</span>
+                        Вики
+                    </a>
+                    <a href="#" className="mobile-nav-link" onClick={(e) => { e.preventDefault(); showNotification('◇ Карта пока недоступна. Следите за обновлениями в Discord!'); closeMobileMenu(); }}>
+                        <span className="mobile-nav-icon">◇</span>
+                        Карта
+                    </a>
+
+                    {user && (
+                        <>
+                            <div className="mobile-menu-divider" />
+                            <Link href={`/profile/${user.username}`} className="mobile-nav-link" onClick={closeMobileMenu}>
+                                <span className="mobile-nav-icon">👤</span>
+                                Мой профиль
+                            </Link>
+                            <Link href="/feed" className="mobile-nav-link" onClick={closeMobileMenu}>
+                                <span className="mobile-nav-icon">📰</span>
+                                Лента
+                            </Link>
+                            <button
+                                className="mobile-nav-link mobile-logout"
+                                onClick={() => { handleLogout(); closeMobileMenu(); }}
+                            >
+                                <span className="mobile-nav-icon">🚪</span>
+                                Выйти
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
 
             {notification && (
                 <div style={{
