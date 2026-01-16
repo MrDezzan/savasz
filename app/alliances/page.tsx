@@ -19,21 +19,26 @@ export default function AlliancesPage() {
             setLoading(true);
             try {
                 const data = await getAlliances();
-                console.log('[Alliances] Loaded:', data.length);
+                console.log('[Alliances] Raw API Data:', data); // LOG 1
+
                 // Convert AllianceData to Alliance type
-                const converted: Alliance[] = data.map((a: AllianceData) => ({
-                    id: a.id,
-                    shortName: a.shortName,
-                    fullName: a.fullName,
-                    description: a.description || '',
-                    logoSvg: '',
-                    color: '#6366f1',
-                    leaderUsername: a.leaderUsername,
-                    memberCount: a.memberCount || 1,
-                    createdAt: a.createdAt || new Date().toISOString(),
-                    recruitmentStatus: 'OPEN' as const,
-                    hasDiscord: false,
-                }));
+                const converted: Alliance[] = data.map((a: AllianceData) => {
+                    console.log('[Alliances] Processing:', a); // LOG 2
+                    return {
+                        id: a.id,
+                        shortName: a.shortName,
+                        fullName: a.fullName,
+                        description: a.description || '',
+                        logoSvg: '',
+                        color: '#6366f1',
+                        leaderUsername: a.leaderUsername,
+                        memberCount: a.memberCount || 1,
+                        createdAt: a.createdAt || new Date().toISOString(),
+                        recruitmentStatus: 'OPEN' as const,
+                        hasDiscord: false,
+                    };
+                });
+                console.log('[Alliances] Converted:', converted); // LOG 3
                 setAlliances(converted);
             } catch (error) {
                 console.error('[Alliances] Failed to load:', error);
