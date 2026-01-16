@@ -37,8 +37,8 @@ export default function Navbar() {
                         <Link href="/alliances" className="nav-link">◆ Альянсы</Link>
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
                         <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
-                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◈ Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
-                        <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◇ Карта пока недоступна. Следите за обновлениями в Discord!'); }}>◇ Карта</a>
+                        <Link href="/wiki" className="nav-link">◈ Вики</Link>
+                        <Link href="/map" className="nav-link">◇ Карта</Link>
                     </div>
 
                     {/* Desktop Login Button */}
@@ -174,14 +174,14 @@ export default function Navbar() {
                         <span className="mobile-nav-icon">◇</span>
                         Магазин
                     </a>
-                    <a href="#" className="mobile-nav-link" onClick={(e) => { e.preventDefault(); showNotification('◈ Вики пока недоступно. Следите за обновлениями в Discord!'); closeMobileMenu(); }}>
+                    <Link href="/wiki" className="mobile-nav-link" onClick={closeMobileMenu}>
                         <span className="mobile-nav-icon">◈</span>
                         Вики
-                    </a>
-                    <a href="#" className="mobile-nav-link" onClick={(e) => { e.preventDefault(); showNotification('◇ Карта пока недоступна. Следите за обновлениями в Discord!'); closeMobileMenu(); }}>
+                    </Link>
+                    <Link href="/map" className="mobile-nav-link" onClick={closeMobileMenu}>
                         <span className="mobile-nav-icon">◇</span>
                         Карта
-                    </a>
+                    </Link>
 
                     {user && (
                         <>
