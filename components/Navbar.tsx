@@ -34,6 +34,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="nav-links">
+                        <Link href="/alliances" className="nav-link">◆ Альянсы</Link>
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
                         <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
                         <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); showNotification('◈ Вики пока недоступно. Следите за обновлениями в Discord!'); }}>◈ Вики</a>
@@ -161,6 +162,10 @@ export default function Navbar() {
             {/* Mobile Menu Panel */}
             <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
+                    <Link href="/alliances" className="mobile-nav-link" onClick={closeMobileMenu}>
+                        <span className="mobile-nav-icon">◆</span>
+                        Альянсы
+                    </Link>
                     <Link href="/leaderboard" className="mobile-nav-link" onClick={closeMobileMenu}>
                         <span className="mobile-nav-icon">◈</span>
                         Статистика

@@ -10,8 +10,8 @@ const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
   title: "Sylvaire — Приватный сервер Minecraft",
-  description: "Уникальный Minecraft сервер с политической ролевой игрой, организациями и социальной сетью",
-  keywords: ["minecraft", "сервер", "rp", "ролевая игра", "политика", "sylvaire"],
+  description: "Присоединяйся к сообществу игроков. Строй, исследуй и создавай историю вместе с нами.",
+  keywords: ["minecraft", "сервер", "приватный", "выживание", "ванилла", "sylvaire"],
   icons: {
     icon: "/assets/logo.png",
     shortcut: "/assets/logo.png",

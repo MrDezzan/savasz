@@ -31,9 +31,6 @@ export default function Sidebar() {
     const { user, logout, isAdmin } = useAuth();
     const [hasNotifications] = useState(false);
 
-    // Определяем, находимся ли мы на внешних страницах (landing, leaderboard)
-    const isExternalPage = pathname === '/' || pathname.startsWith('/leaderboard');
-
     const navItems: NavItem[] = [
         { href: '/forum', icon: IconComment, label: 'Форум' },
         { href: '/alliances', icon: IconAlliance, label: 'Альянсы' },
@@ -49,14 +46,9 @@ export default function Sidebar() {
 
     const isActive = (href: string) => {
         if (href === '/forum') return pathname === '/forum' || pathname.startsWith('/forum');
-        if (href === '/leaderboard') return pathname.startsWith('/leaderboard');
+        if (href === '/alliances') return pathname.startsWith('/alliances');
         return pathname.startsWith(href);
     };
-
-    // На внешних страницах не показываем sidebar
-    if (isExternalPage) {
-        return null;
-    }
 
     return (
         <>
