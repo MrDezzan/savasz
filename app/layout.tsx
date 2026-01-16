@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ConditionalLayout from "@/components/ConditionalLayout";
 import Providers from "@/components/Providers";
 import { Toaster } from "sonner";
 
@@ -28,11 +27,9 @@ export default function RootLayout({
     <html lang="ru">
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <Navbar />
-          <main className="min-h-screen pt-16">
+          <ConditionalLayout>
             {children}
-          </main>
-          <Footer />
+          </ConditionalLayout>
           <Toaster position="top-right" richColors theme="dark" />
         </Providers>
       </body>
