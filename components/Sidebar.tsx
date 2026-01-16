@@ -35,7 +35,6 @@ export default function Sidebar() {
         { href: '/forum', icon: IconComment, label: 'Форум' },
         { href: '/alliances', icon: IconAlliance, label: 'Альянсы' },
         { href: '/forum/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
-        { href: '/notifications', icon: IconBell, label: 'Уведомления', requiresAuth: true, showBadge: hasNotifications },
         { href: user ? `/profile/${user.username}` : '/login', icon: IconUser, label: 'Профиль' },
     ];
 

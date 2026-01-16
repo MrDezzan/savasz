@@ -19,7 +19,7 @@ export default function LoginPage() {
     // Redirect if already logged in
     useEffect(() => {
         if (user) {
-            router.push('/feed');
+            router.push('/forum');
         }
     }, [user, router]);
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 login(data.token, username);
                 setState('success');
                 setTimeout(() => {
-                    router.push('/feed');
+                    router.push('/forum');
                 }, 1500);
             } else {
                 if (data.denied) {

@@ -5,6 +5,7 @@ import { Post, FeedFilters } from '@/lib/types/feed';
 import { PostCard, FeedSidebar, CreatePost } from '@/components/feed';
 import { useAuth } from '@/lib/auth-context';
 import { IconTrash } from '@/components/ui/icons';
+import { getFeed, createPost as createPostApi, FeedPost } from '@/lib/api';
 
 export default function ForumPage() {
     const { user, isAdmin } = useAuth();
@@ -16,12 +17,28 @@ export default function ForumPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: Replace with actual API call - fetch posts from backend
         const loadPosts = async () => {
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 300));
-            // Posts will be loaded from API
-            setPosts([]);
+            try {
+                const data = await getFeed(0);
+                console.log('[Forum] getFeed response:', data);
+                // Convert FeedPost to Post format
+                const convertedPosts: Post[] = data.posts.map((p: FeedPost) => ({
+                    id: p.id,
+                    authorUsername: p.authorUsername,
+                    content: p.content,
+                    createdAt: p.createdAt,
+                    likesCount: 0,
+                    commentsCount: 0,
+                    isAdmin: p.isAdmin,
+                    hasSubscription: p.hasSubscription,
+                }));
+                console.log('[Forum] Loaded posts:', convertedPosts.length);
+                setPosts(convertedPosts);
+            } catch (error) {
+                console.error('[Forum] Failed to load posts:', error);
+                setPosts([]);
+            }
             setLoading(false);
         };
 
@@ -31,33 +48,49 @@ export default function ForumPage() {
     const handleCreatePost = async (content: string, imageUrl?: string) => {
         if (!user) return;
 
-        // TODO: Send to API
-        const newPost: Post = {
-            id: Date.now(),
-            authorUsername: user.username,
-            content,
-            imageUrl,
-            createdAt: new Date().toISOString(),
-            likesCount: 0,
-            commentsCount: 0,
-        };
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            console.error('[Forum] No auth token found');
+            return;
+        }
 
-        setPosts(prev => [newPost, ...prev]);
+        try {
+            console.log('[Forum] Creating post with token:', token.substring(0, 20) + '...');
+            const result = await createPostApi(content, token);
+            console.log('[Forum] createPost response:', result);
+            if (result.success && result.postId) {
+                // Add new post to the top
+                const newPost: Post = {
+                    id: result.postId,
+                    authorUsername: user.username,
+                    content,
+                    imageUrl,
+                    createdAt: new Date().toISOString(),
+                    likesCount: 0,
+                    commentsCount: 0,
+                };
+                setPosts(prev => [newPost, ...prev]);
+                console.log('[Forum] Post added locally, ID:', result.postId);
+            } else {
+                console.error('[Forum] API returned error:', result.error);
+            }
+        } catch (error) {
+            console.error('[Forum] Failed to create post:', error);
+        }
     };
 
     const handleLike = (postId: number) => {
-        // TODO: Send like to API
-        console.log('Like post:', postId);
+        // Like API not implemented on backend yet
     };
 
     const handleComment = (postId: number, content: string) => {
-        // TODO: Send comment to API
-        console.log('Comment on post:', postId, content);
+        // Comment API not implemented on backend yet
     };
 
     const handleDeletePost = async (postId: number) => {
         if (!isAdmin) return;
-        // TODO: Send delete to API
+        // Delete API not implemented on backend yet
+        // For now just remove from local state
         setPosts(prev => prev.filter(p => p.id !== postId));
     };
 
