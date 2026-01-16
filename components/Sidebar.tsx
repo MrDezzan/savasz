@@ -34,7 +34,7 @@ export default function Sidebar() {
     const navItems: NavItem[] = [
         { href: '/forum', icon: IconComment, label: 'Форум' },
         { href: '/alliances', icon: IconAlliance, label: 'Альянсы' },
-        { href: '/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
+        { href: '/forum/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
         { href: '/notifications', icon: IconBell, label: 'Уведомления', requiresAuth: true, showBadge: hasNotifications },
         { href: user ? `/profile/${user.username}` : '/login', icon: IconUser, label: 'Профиль' },
     ];
@@ -45,7 +45,8 @@ export default function Sidebar() {
     ];
 
     const isActive = (href: string) => {
-        if (href === '/forum') return pathname === '/forum' || pathname.startsWith('/forum');
+        if (href === '/forum') return pathname === '/forum';
+        if (href === '/forum/leaderboard') return pathname === '/forum/leaderboard';
         if (href === '/alliances') return pathname.startsWith('/alliances');
         return pathname.startsWith(href);
     };

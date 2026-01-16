@@ -1,0 +1,124 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { getLeaderboard, LeaderboardEntry, LeaderboardPeriod } from '@/lib/api';
+
+export default function ForumLeaderboardPage() {
+    const [period, setPeriod] = useState<LeaderboardPeriod>('ALL_TIME');
+    const [loading, setLoading] = useState(true);
+    const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+
+    // Deduplicate by username, keeping entry with higher playtime
+    const deduplicateByUsername = (players: LeaderboardEntry[]) => {
+        const map = new Map<string, LeaderboardEntry>();
+
+        for (const player of players) {
+            const key = player.username.toLowerCase();
+            const existing = map.get(key);
+
+            if (!existing || (player.totalPlaytimeSeconds || 0) > (existing.totalPlaytimeSeconds || 0)) {
+                map.set(key, player);
+            }
+        }
+
+        return Array.from(map.values())
+            .sort((a, b) => (b.totalPlaytimeSeconds || 0) - (a.totalPlaytimeSeconds || 0));
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        getLeaderboard(period).then((data) => {
+            setEntries(deduplicateByUsername(data));
+            setLoading(false);
+        });
+    }, [period]);
+
+    const getRankClass = (index: number) => {
+        switch (index) {
+            case 0: return 'gold';
+            case 1: return 'silver';
+            case 2: return 'bronze';
+            default: return 'normal';
+        }
+    };
+
+    return (
+        <div className="forum-leaderboard-page">
+            <div className="page-header">
+                <h1 className="page-title">Рейтинг игроков</h1>
+                <p className="page-subtitle">Топ по времени на сервере</p>
+            </div>
+
+            <div className="period-tabs">
+                <button
+                    className={`period-tab ${period === 'ALL_TIME' ? 'active' : ''}`}
+                    onClick={() => setPeriod('ALL_TIME')}
+                >
+                    За всё время
+                </button>
+                <button
+                    className={`period-tab ${period === 'MONTH' ? 'active' : ''}`}
+                    onClick={() => setPeriod('MONTH')}
+                >
+                    Месяц
+                </button>
+                <button
+                    className={`period-tab ${period === 'WEEK' ? 'active' : ''}`}
+                    onClick={() => setPeriod('WEEK')}
+                >
+                    Неделя
+                </button>
+            </div>
+
+            <div id="leaderboard-container">
+                {loading ? (
+                    <div className="leaderboard-loading">
+                        <div className="loading-spinner"></div>
+                        <p>Загрузка лидерборда...</p>
+                    </div>
+                ) : entries.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📊</div>
+                        <p>Нет данных за этот период</p>
+                    </div>
+                ) : (
+                    <div className="leaderboard-list">
+                        {entries.map((entry, index) => (
+                            <Link href={`/profile/${entry.username}`} key={entry.username} className={`leaderboard-item clickable ${entry.isOnline ? 'online' : ''}`}>
+                                <div className={`rank-badge ${getRankClass(index)}`}>
+                                    {index + 1}
+                                </div>
+                                <div className="player-avatar-large">
+                                    <img
+                                        src={`https://mc-heads.net/avatar/${entry.username}/56`}
+                                        alt={entry.username}
+                                        onError={(e) => { e.currentTarget.src = 'https://mc-heads.net/avatar/MHF_Steve/56'; }}
+                                    />
+                                </div>
+                                <div className="player-details">
+                                    <div className="player-username">
+                                        {entry.username}
+                                        {entry.isOnline && (
+                                            <span className="online-indicator">
+                                                <span className="online-dot"></span>
+                                                Онлайн
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="player-stats">
+                                        <span>Всего наиграно:</span>
+                                        <span className="player-playtime">
+                                            {entry.totalPlaytimeSeconds ? Math.floor(entry.totalPlaytimeSeconds / 3600) : 0} ч.
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="profile-arrow">→</div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

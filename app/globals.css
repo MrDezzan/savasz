@@ -95,6 +95,27 @@ body {
   padding-bottom: 80px;
 }
 
+/* Forum Leaderboard Page - scoped styles */
+.forum-leaderboard-page {
+  padding: 32px 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.forum-leaderboard-page .page-header {
+  margin-bottom: 32px;
+}
+
+.forum-leaderboard-page .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.forum-leaderboard-page .page-subtitle {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .forum-content {
     margin-left: 0;
