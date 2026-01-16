@@ -6,6 +6,7 @@ import { Alliance } from '@/lib/types/alliance';
 import AllianceCard from '@/components/alliance/AllianceCard';
 import { IconPlus, IconSearch, IconAlliance } from '@/components/ui/icons';
 import { useAuth } from '@/lib/auth-context';
+import { getAlliances, AllianceData } from '@/lib/api';
 
 export default function AlliancesPage() {
     const { user } = useAuth();
@@ -14,12 +15,30 @@ export default function AlliancesPage() {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        // TODO: Replace with actual API call
         const loadAlliances = async () => {
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 300));
-            // Alliances will be loaded from backend API
-            setAlliances([]);
+            try {
+                const data = await getAlliances();
+                console.log('[Alliances] Loaded:', data.length);
+                // Convert AllianceData to Alliance type
+                const converted: Alliance[] = data.map((a: AllianceData) => ({
+                    id: a.id,
+                    shortName: a.shortName,
+                    fullName: a.fullName,
+                    description: a.description || '',
+                    logoSvg: '',
+                    color: '#6366f1',
+                    leaderUsername: a.creator,
+                    memberCount: a.memberCount || 1,
+                    createdAt: a.createdAt || new Date().toISOString(),
+                    recruitmentStatus: 'OPEN' as const,
+                    hasDiscord: false,
+                }));
+                setAlliances(converted);
+            } catch (error) {
+                console.error('[Alliances] Failed to load:', error);
+                setAlliances([]);
+            }
             setLoading(false);
         };
 

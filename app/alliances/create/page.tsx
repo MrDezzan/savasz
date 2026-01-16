@@ -59,12 +59,26 @@ export default function CreateAlliancePage() {
         setIsSubmitting(true);
         setError(null);
 
+        const token = localStorage.getItem('sylvaire_token');
+        if (!token) {
+            setError('Требуется авторизация');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
-            // TODO: Send to API
-            console.log('Creating alliance:', { ...formData, logoSvg: svg });
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            router.push('/alliances');
+            const { createAlliance } = await import('@/lib/api');
+            const result = await createAlliance(formData.shortName, formData.fullName, token);
+
+            if (result.success) {
+                console.log('[Alliance] Created successfully:', formData.shortName);
+                router.push('/alliances');
+            } else {
+                setError(result.error || 'Ошибка при создании альянса');
+                setIsSubmitting(false);
+            }
         } catch (err) {
+            console.error('[Alliance] Create failed:', err);
             setError('Ошибка при создании альянса');
             setIsSubmitting(false);
         }
