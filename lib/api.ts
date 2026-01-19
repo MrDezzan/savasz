@@ -102,6 +102,7 @@ export interface PlayerProfile {
     isBanned?: boolean;
     banReason?: string;
     banExpires?: string;
+    banRemaining?: string;
 }
 
 

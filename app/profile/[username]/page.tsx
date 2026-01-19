@@ -174,7 +174,7 @@ export default function ProfilePage() {
                                 <span style={{ color: '#9ca3af' }}>Причина:</span> <span style={{ color: 'white', fontWeight: 500 }}>{profile.banReason || 'Не указана'}</span>
                             </div>
                             <div>
-                                <span style={{ color: '#9ca3af' }}>Истекает:</span> <span style={{ color: '#fbbf24', fontWeight: 600 }}>{profile.banExpires || 'Неизвестно'}</span>
+                                <span style={{ color: '#9ca3af' }}>Осталось:</span> <span style={{ color: '#fbbf24', fontWeight: 600 }}>{profile.banRemaining || 'Неизвестно'}</span>
                             </div>
                         </div>
                     </div>

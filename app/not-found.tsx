@@ -21,10 +21,10 @@ export default function NotFound() {
 
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 px-8 py-3 bg-white text-slate-900 rounded-xl font-semibold hover:bg-indigo-50 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/20"
+                    className="inline-flex items-center gap-2 px-10 py-4 text-lg bg-[#0F172A] text-white border border-indigo-500/30 rounded-md font-semibold hover:bg-indigo-900/40 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/10 mt-8"
                 >
                     <span>Вернуться домой</span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         <polyline points="9 22 9 12 15 12 15 22" />
                     </svg>
