@@ -170,6 +170,13 @@ export async function createPost(content: string, token: string): Promise<{ succ
     });
 }
 
+export async function deletePost(postId: number, token: string): Promise<{ success: boolean; error?: string }> {
+    return api(`/api/posts/${postId}`, {
+        method: 'DELETE',
+        token,
+    });
+}
+
 // Auth
 export async function requestAuth(username: string): Promise<{ success: boolean; error?: string }> {
     return api('/api/auth/request', {
@@ -223,5 +230,3 @@ export async function checkTagManagementPermission(
         return false;
     }
 }
-
-

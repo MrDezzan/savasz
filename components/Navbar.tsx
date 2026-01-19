@@ -34,7 +34,7 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="nav-links">
-                        <Link href="/alliances" className="nav-link">◆ Альянсы</Link>
+                        <Link href="/forum" className="nav-link">◆ Форум</Link>
                         <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
                         <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
                         <Link href="/wiki" className="nav-link">◈ Вики</Link>
@@ -162,9 +162,9 @@ export default function Navbar() {
             {/* Mobile Menu Panel */}
             <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    <Link href="/alliances" className="mobile-nav-link" onClick={closeMobileMenu}>
+                    <Link href="/forum" className="mobile-nav-link" onClick={closeMobileMenu}>
                         <span className="mobile-nav-icon">◆</span>
-                        Альянсы
+                        Форум
                     </Link>
                     <Link href="/leaderboard" className="mobile-nav-link" onClick={closeMobileMenu}>
                         <span className="mobile-nav-icon">◈</span>

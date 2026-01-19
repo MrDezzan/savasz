@@ -3,21 +3,39 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Post } from '@/lib/types/feed';
-import { IconHeart, IconHeartFilled, IconComment, IconMoreHorizontal, IconCrown, IconBan } from '@/components/ui/icons';
+import { IconHeart, IconHeartFilled, IconComment, IconMoreHorizontal, IconCrown, IconBan, IconTrash } from '@/components/ui/icons';
 import CommentSection from './CommentSection';
+import { useAuth } from '@/lib/auth-context';
+import { useEffect, useRef } from 'react';
 
 interface PostCardProps {
     post: Post;
     onLike?: (postId: number) => void;
     onComment?: (postId: number, content: string) => void;
+    onDelete?: (postId: number) => void;
     showComments?: boolean;
 }
 
-export default function PostCard({ post, onLike, onComment, showComments = true }: PostCardProps) {
+export default function PostCard({ post, onLike, onComment, onDelete, showComments = true }: PostCardProps) {
+    const { isAdmin } = useAuth();
     const [isLiked, setIsLiked] = useState(post.isLikedByMe || false);
     const [likesCount, setLikesCount] = useState(post.likesCount);
     const [showAllComments, setShowAllComments] = useState(false);
     const [showCommentInput, setShowCommentInput] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleLike = () => {
         if (onLike) {
@@ -92,9 +110,35 @@ export default function PostCard({ post, onLike, onComment, showComments = true 
                 </Link>
                 <div className="post-meta">
                     <span className="post-time">{formatTimeAgo(post.createdAt)}</span>
-                    <button className="post-menu-btn">
-                        <IconMoreHorizontal size={18} />
-                    </button>
+                    <div className="post-menu-container" ref={menuRef}>
+                        <button
+                            className="post-menu-btn"
+                            onClick={() => setShowMenu(!showMenu)}
+                        >
+                            <IconMoreHorizontal size={18} />
+                        </button>
+                        {showMenu && (
+                            <div className="post-menu-dropdown">
+                                {isAdmin && onDelete && (
+                                    <button
+                                        className="post-menu-item delete"
+                                        onClick={() => {
+                                            if (confirm('Вы уверены, что хотите удалить эту публикацию?')) {
+                                                onDelete(post.id);
+                                            }
+                                            setShowMenu(false);
+                                        }}
+                                    >
+                                        <IconTrash size={16} />
+                                        <span>Удалить</span>
+                                    </button>
+                                )}
+                                {!isAdmin && (
+                                    <div className="post-menu-item disabled">Нет действий</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

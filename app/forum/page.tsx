@@ -5,7 +5,7 @@ import { Post, FeedFilters } from '@/lib/types/feed';
 import { PostCard, FeedSidebar, CreatePost } from '@/components/feed';
 import { useAuth } from '@/lib/auth-context';
 import { IconTrash } from '@/components/ui/icons';
-import { getFeed, createPost as createPostApi, FeedPost } from '@/lib/api';
+import { getFeed, createPost as createPostApi, deletePost, FeedPost } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function ForumPage() {
@@ -98,9 +98,22 @@ export default function ForumPage() {
 
     const handleDeletePost = async (postId: number) => {
         if (!isAdmin) return;
-        // Delete API not implemented on backend yet
-        // For now just remove from local state
-        setPosts(prev => prev.filter(p => p.id !== postId));
+
+        const token = localStorage.getItem('sylvaire_token');
+        if (!token) return;
+
+        try {
+            const result = await deletePost(postId, token);
+            if (result.success) {
+                setPosts(prev => prev.filter(p => p.id !== postId));
+                toast.success('Публикация удалена');
+            } else {
+                toast.error('Ошибка: ' + (result.error || 'Не удалось удалить публикацию'));
+            }
+        } catch (error) {
+            console.error('[Forum] Failed to delete post:', error);
+            toast.error('Ошибка удаления');
+        }
     };
 
     return (
@@ -139,17 +152,8 @@ export default function ForumPage() {
                                         post={post}
                                         onLike={handleLike}
                                         onComment={handleComment}
+                                        onDelete={handleDeletePost}
                                     />
-                                    {/* Admin delete button */}
-                                    {isAdmin && (
-                                        <button
-                                            className="admin-delete-btn"
-                                            onClick={() => handleDeletePost(post.id)}
-                                            title="Удалить публикацию"
-                                        >
-                                            <IconTrash size={16} />
-                                        </button>
-                                    )}
                                 </div>
                             ))
                         )}
