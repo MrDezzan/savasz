@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Alliance } from '@/lib/types/alliance';
 import { getAlliance } from '@/lib/api';
 import { IconUsers, IconDiscord, IconCrown, IconArrowLeft } from '@/components/ui/icons';
 
-export default function AllianceDetailPage({ params }: { params: { id: string } }) {
+export default function AllianceDetailPage() {
+    const params = useParams();
+    const idParam = params?.id;
+    // Decode shortName from URL, handling potential array or undefined
+    const shortName = typeof idParam === 'string' ? decodeURIComponent(idParam) : '';
+
     const [alliance, setAlliance] = useState<Alliance | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    // Decode shortName from URL (params.id)
-    const shortName = decodeURIComponent(params.id);
 
     useEffect(() => {
         const loadAlliance = async () => {
