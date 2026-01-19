@@ -3,6 +3,18 @@
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import { getServerStats } from '@/lib/api';
+import {
+  IconClock,
+  IconTrophy,
+  IconHeart,
+  IconUsers,
+  IconPickaxe,
+  IconHome,
+  IconShoppingBag,
+  IconStar,
+  IconRefresh,
+  IconDiscord
+} from '@/components/ui/icons';
 
 export default function HomePage() {
   const [online, setOnline] = useState(0);
@@ -75,7 +87,7 @@ export default function HomePage() {
               Приватный сервер Minecraft, где фантазия становится реальностью.
               Присоединяйся к нашему уютному миру приключений, творчества и настоящего выживания.
             </p>
-            <p className="hero-version">✦ 1.21.8 · Java Edition</p>
+            <p className="hero-version"><IconStar size={16} className="inline-icon" /> 1.21.8 · Java Edition</p>
             <div className="hero-btns">
               <a href="https://dsc.gg/sylvaire" className="btn btn-primary">Начать приключение →</a>
               <a href="#features" className="btn btn-secondary">Подробнее</a>
@@ -91,11 +103,21 @@ export default function HomePage() {
 
       <section className="marquee-section">
         <div className="marquee-track">
-          <span className="marquee-text">✦ Приватный ✦ Уютный ✦ Атмосферный ✦ Дружелюбный ✦ Творческий ✦ Уникальный ✦
-            Честный ✦ Захватывающий ✦ Sylvaire ✦ Приватный ✦ Уютный ✦ Атмосферный ✦ Дружелюбный ✦ Творческий ✦
-            Уникальный ✦ Честный ✦ Захватывающий ✦ Sylvaire ✦ Приватный ✦ Уютный ✦ Атмосферный ✦ Дружелюбный ✦
-            Творческий ✦ Уникальный ✦ Честный ✦ Захватывающий ✦ Sylvaire ✦ Приватный ✦ Уютный ✦ Атмосферный ✦
-            Дружелюбный ✦ Творческий ✦ Уникальный ✦ Честный ✦ Захватывающий ✦ Sylvaire </span>
+          <div className="marquee-content">
+            {Array(10).fill(null).map((_, i) => (
+              <div key={i} className="marquee-group">
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Приватный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Уютный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Атмосферный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Дружелюбный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Творческий</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Уникальный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Честный</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Захватывающий</span>
+                <span className="marquee-item"><IconStar size={14} className="marquee-icon" /> Sylvaire</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -105,24 +127,24 @@ export default function HomePage() {
           <p className="section-sub">Мы — история! Уникальный игровой опыт, созданный с заботой о каждом игроке</p>
           <div className="cards-row">
             <div className="card fade-in">
-              <div className="card-icon">↻</div>
+              <div className="card-icon"><IconRefresh size={48} /></div>
               <h3 className="card-title">Регулярные обновления</h3>
               <p className="card-text">Мы постоянно совершенствуем Sylvaire, добавляя новые механики и улучшения.
                 Всегда вперёд!</p>
             </div>
             <div className="card fade-in">
-              <div className="card-icon">◈</div>
+              <div className="card-icon"><IconTrophy size={48} /></div>
               <h3 className="card-title">Стабильные сезоны</h3>
               <p className="card-text">Наши сезоны проходят без сбоев и долгих перерывов. Каждый сезон длится минимум
                 3 месяца.</p>
             </div>
             <div className="card fade-in">
-              <div className="card-icon">◇</div>
+              <div className="card-icon"><IconHeart size={48} /></div>
               <h3 className="card-title">Комфортная игра</h3>
               <p className="card-text">Sylvaire — место без токсичности. Играйте в дружелюбной атмосфере.</p>
             </div>
             <div className="card fade-in">
-              <div className="card-icon">♡</div>
+              <div className="card-icon"><IconUsers size={48} /></div>
               <h3 className="card-title">Дружелюбное комьюнити</h3>
               <p className="card-text">Здесь легко найти новых друзей и разделить увлекательные истории.</p>
             </div>
@@ -161,17 +183,17 @@ export default function HomePage() {
           <p className="section-sub">Игроки заходят на сервер чтобы общаться, найти новую компанию и друзей</p>
           <div className="cards-row cards-row-3">
             <div className="card card-blue fade-in">
-              <div className="card-icon">⛏</div>
+              <div className="card-icon"><IconPickaxe size={48} /></div>
               <h3 className="card-title">Выживайте</h3>
               <p className="card-text">Основа сервера — классическое, ванильное выживание с другими игроками</p>
             </div>
             <div className="card card-blue fade-in">
-              <div className="card-icon">⌂</div>
+              <div className="card-icon"><IconHome size={48} /></div>
               <h3 className="card-title">Вступайте в общину</h3>
               <p className="card-text">Общины — это объединения игроков, которые вместе строят города и общаются</p>
             </div>
             <div className="card card-blue fade-in">
-              <div className="card-icon">◈</div>
+              <div className="card-icon"><IconShoppingBag size={48} /></div>
               <h3 className="card-title">Торгуйте</h3>
               <p className="card-text">Обменивайтесь ресурсами, развивайте экономику и открывайте свой магазин</p>
             </div>
@@ -188,7 +210,7 @@ export default function HomePage() {
 
       <section id="join" className="cta">
         <div className="container">
-          <div className="cta-icon">✦</div>
+          <div className="cta-icon"><IconStar size={64} /></div>
           <h2 className="cta-title">Готовы начать <span className="accent">приключение</span>?</h2>
           <p className="cta-text">Присоединяйтесь к игрокам, которые уже создают свою историю на Sylvaire</p>
           <div className="cta-buttons">
@@ -203,7 +225,7 @@ export default function HomePage() {
         <div className="container">
           <div className="faq-grid">
             <div className="faq-col">
-              <h2 className="faq-title">? Часто задаваемые <span className="accent">вопросы</span></h2>
+              <h2 className="faq-title">Часто задаваемые <span className="accent">вопросы</span></h2>
               <div className="faq-list">
                 {[
                   { q: "Какая версия у проекта?", a: "Проект установлен на версии 1.21.8. Можно заходить с версий 1.21.6 – 1.21.8!" },
@@ -228,9 +250,7 @@ export default function HomePage() {
               <div className="links-grid">
                 <a href="https://dsc.gg/sylvaire" className="link-card">
                   <span className="link-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12" />
-                    </svg>
+                    <IconDiscord size={24} />
                   </span>
                   <div className="link-info">
                     <span className="link-name">Discord</span>
@@ -263,7 +283,7 @@ export default function HomePage() {
                   <span className="link-arrow">→</span>
                 </a>
                 <a href="https://shop.sylvaire.ru" className="link-card">
-                  <span className="link-icon">◇</span>
+                  <span className="link-icon"><IconShoppingBag size={24} /></span>
                   <div className="link-info">
                     <span className="link-name">Магазин</span>
                     <span className="link-desc">Поддержи проект</span>
@@ -275,6 +295,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </div>
+    </div >
   );
 }

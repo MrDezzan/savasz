@@ -293,6 +293,41 @@ export const IconLogout: React.FC<IconProps> = ({ size = 24, className, strokeWi
     </svg>
 );
 
+// Refresh / Update Icon
+export const IconRefresh: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M23 4v6h-6" />
+        <path d="M1 20v-6h6" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+);
+
+// Star Icon
+export const IconStar: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+);
+
+// Pickaxe Icon
+export const IconPickaxe: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M14.5 5.5L7 13" />
+        <path d="M10 2l-7 7 4 4 15-11-2-2z" />
+        <line x1="16.5" y1="9.5" x2="21" y2="14" />
+        <path d="M9.5 7.5L4 13" />
+    </svg>
+);
+
+// Shopping Bag Icon
+export const IconShoppingBag: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+);
+
 // Export all icons
 export const Icons = {
     Home: IconHome,
@@ -329,6 +364,10 @@ export const Icons = {
     Filter: IconFilter,
     Sort: IconSort,
     Logout: IconLogout,
+    Refresh: IconRefresh,
+    Star: IconStar,
+    Pickaxe: IconPickaxe,
+    ShoppingBag: IconShoppingBag,
 };
 
 export default Icons;

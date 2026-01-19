@@ -3,6 +3,14 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import {
+    IconHome,
+    IconUser,
+    IconTrophy,
+    IconLogs,
+    IconComment,
+    IconLogout
+} from '@/components/ui/icons';
 
 export default function Navbar() {
     const { user, loading, logout } = useAuth();
@@ -34,11 +42,11 @@ export default function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="nav-links">
-                        <Link href="/forum" className="nav-link">◆ Форум</Link>
-                        <Link href="/leaderboard" className="nav-link">◈ Статистика</Link>
-                        <a href="https://shop.sylvaire.ru" className="nav-link">◇ Магазин</a>
-                        <Link href="/wiki" className="nav-link">◈ Вики</Link>
-                        <Link href="/map" className="nav-link">◇ Карта</Link>
+                        <Link href="/forum" className="nav-link"><IconComment size={16} /> Форум</Link>
+                        <Link href="/leaderboard" className="nav-link"><IconTrophy size={16} /> Статистика</Link>
+                        <a href="https://shop.sylvaire.ru" className="nav-link"><IconHome size={16} /> Магазин</a>
+                        <Link href="/wiki" className="nav-link"><IconLogs size={16} /> Вики</Link>
+                        <Link href="/map" className="nav-link"><IconHome size={16} /> Карта</Link>
                     </div>
 
                     {/* Desktop Login Button */}
@@ -78,7 +86,9 @@ export default function Navbar() {
                                             className="nav-dropdown-item"
                                             onClick={() => setShowUserMenu(false)}
                                             style={{
-                                                display: 'block',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
                                                 padding: '10px 14px',
                                                 color: 'white',
                                                 textDecoration: 'none',
@@ -86,14 +96,16 @@ export default function Navbar() {
                                                 fontSize: '14px'
                                             }}
                                         >
-                                            👤 Мой профиль
+                                            <IconUser size={16} /> Мой профиль
                                         </Link>
                                         <Link
                                             href="/feed"
                                             className="nav-dropdown-item"
                                             onClick={() => setShowUserMenu(false)}
                                             style={{
-                                                display: 'block',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
                                                 padding: '10px 14px',
                                                 color: 'white',
                                                 textDecoration: 'none',
@@ -101,13 +113,15 @@ export default function Navbar() {
                                                 fontSize: '14px'
                                             }}
                                         >
-                                            📰 Лента
+                                            <IconComment size={16} /> Лента
                                         </Link>
                                         <div style={{ height: '1px', background: 'rgba(99, 102, 241, 0.2)', margin: '8px 0' }} />
                                         <button
                                             onClick={handleLogout}
                                             style={{
-                                                display: 'block',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
                                                 width: '100%',
                                                 padding: '10px 14px',
                                                 color: '#f87171',
@@ -119,7 +133,7 @@ export default function Navbar() {
                                                 cursor: 'pointer'
                                             }}
                                         >
-                                            🚪 Выйти
+                                            <IconLogout size={16} /> Выйти
                                         </button>
                                     </div>
                                 )}
@@ -163,23 +177,23 @@ export default function Navbar() {
             <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
                     <Link href="/forum" className="mobile-nav-link" onClick={closeMobileMenu}>
-                        <span className="mobile-nav-icon">◆</span>
+                        <IconComment className="mobile-nav-icon" size={20} />
                         Форум
                     </Link>
                     <Link href="/leaderboard" className="mobile-nav-link" onClick={closeMobileMenu}>
-                        <span className="mobile-nav-icon">◈</span>
+                        <IconTrophy className="mobile-nav-icon" size={20} />
                         Статистика
                     </Link>
                     <a href="https://shop.sylvaire.ru" className="mobile-nav-link" onClick={closeMobileMenu}>
-                        <span className="mobile-nav-icon">◇</span>
+                        <IconHome className="mobile-nav-icon" size={20} />
                         Магазин
                     </a>
                     <Link href="/wiki" className="mobile-nav-link" onClick={closeMobileMenu}>
-                        <span className="mobile-nav-icon">◈</span>
+                        <IconLogs className="mobile-nav-icon" size={20} />
                         Вики
                     </Link>
                     <Link href="/map" className="mobile-nav-link" onClick={closeMobileMenu}>
-                        <span className="mobile-nav-icon">◇</span>
+                        <IconHome className="mobile-nav-icon" size={20} />
                         Карта
                     </Link>
 
@@ -187,18 +201,18 @@ export default function Navbar() {
                         <>
                             <div className="mobile-menu-divider" />
                             <Link href={`/profile/${user.username}`} className="mobile-nav-link" onClick={closeMobileMenu}>
-                                <span className="mobile-nav-icon">👤</span>
+                                <IconUser className="mobile-nav-icon" size={20} />
                                 Мой профиль
                             </Link>
                             <Link href="/feed" className="mobile-nav-link" onClick={closeMobileMenu}>
-                                <span className="mobile-nav-icon">📰</span>
+                                <IconComment className="mobile-nav-icon" size={20} />
                                 Лента
                             </Link>
                             <button
                                 className="mobile-nav-link mobile-logout"
                                 onClick={() => { handleLogout(); closeMobileMenu(); }}
                             >
-                                <span className="mobile-nav-icon">🚪</span>
+                                <IconLogout className="mobile-nav-icon" size={20} />
                                 Выйти
                             </button>
                         </>
