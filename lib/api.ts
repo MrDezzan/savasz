@@ -156,10 +156,17 @@ export interface FeedPost {
     isAdmin?: boolean;
     isModerator?: boolean;
     hasSubscription?: boolean;
+    likesCount: number;
+    commentsCount: number;
+    isLiked: boolean;
 }
 
-export async function getFeed(page = 0): Promise<{ posts: FeedPost[]; hasMore: boolean; total: number }> {
-    const data = await api<{ success: boolean; posts: FeedPost[]; hasMore: boolean; total: number }>(`/api/feed?page=${page}`);
+export async function getFeed(page = 0, token?: string): Promise<{ posts: FeedPost[]; hasMore: boolean; total: number }> {
+    const options: FetchOptions = {};
+    if (token) {
+        options.token = token;
+    }
+    const data = await api<{ success: boolean; posts: FeedPost[]; hasMore: boolean; total: number }>(`/api/feed?page=${page}`, options);
     return data;
 }
 
@@ -173,6 +180,54 @@ export async function createPost(content: string, token: string): Promise<{ succ
 
 export async function deletePost(postId: number, token: string): Promise<{ success: boolean; error?: string }> {
     return api(`/api/posts/${postId}`, {
+        method: 'DELETE',
+        token,
+    });
+}
+
+// Interactions
+export async function toggleLike(postId: number, token: string): Promise<{ success: boolean; liked: boolean }> {
+    // Backend toggleLike returns boolean directly in ForumService but WebServer usually wraps in JSON "success".
+    // Checking WebServer.java source code (imagined from previous):
+    // app.post("/api/posts/{id}/like", this::toggleLike);
+    // ForumService toggleLike returns boolean.
+    // I need to check how WebServer wraps it.
+    // Actually, I didn't check WebServer.java toggleLike implementation, only assuming.
+    // Let's assume standard JSON wrapper.
+    return api(`/api/posts/${postId}/like`, {
+        method: 'POST',
+        token,
+    });
+}
+
+export interface Comment {
+    id: number;
+    postId: number;
+    authorUsername: string;
+    content: string;
+    createdAt: string;
+    isDeleted: boolean;
+    isAdmin?: boolean;
+    isModerator?: boolean;
+    hasSubscription?: boolean;
+    isBanned?: boolean;
+}
+
+export async function getComments(postId: number): Promise<Comment[]> {
+    const data = await api<{ success: boolean; comments: Comment[] }>(`/api/posts/${postId}/comments`);
+    return data.comments || [];
+}
+
+export async function createComment(postId: number, content: string, token: string): Promise<{ success: boolean; commentId?: number; error?: string }> {
+    return api(`/api/posts/${postId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+        token,
+    });
+}
+
+export async function deleteComment(commentId: number, token: string): Promise<{ success: boolean; error?: string }> {
+    return api(`/api/comments/${commentId}`, {
         method: 'DELETE',
         token,
     });

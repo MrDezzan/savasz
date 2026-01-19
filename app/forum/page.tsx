@@ -5,7 +5,7 @@ import { Post, FeedFilters } from '@/lib/types/feed';
 import { PostCard, FeedSidebar, CreatePost } from '@/components/feed';
 import { useAuth } from '@/lib/auth-context';
 import { IconTrash } from '@/components/ui/icons';
-import { getFeed, createPost as createPostApi, deletePost, FeedPost } from '@/lib/api';
+import { getFeed, createPost as createPostApi, deletePost, toggleLike, createComment, FeedPost } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function ForumPage() {
@@ -21,7 +21,9 @@ export default function ForumPage() {
         const loadPosts = async () => {
             setLoading(true);
             try {
-                const data = await getFeed(0);
+                // Pass token if user is logged in
+                const token = localStorage.getItem('sylvaire_token');
+                const data = await getFeed(0, token || undefined);
                 console.log('[Forum] getFeed response:', data);
                 // Convert FeedPost to Post format
                 const convertedPosts: Post[] = data.posts.map((p: FeedPost) => ({
@@ -29,10 +31,11 @@ export default function ForumPage() {
                     authorUsername: p.authorUsername,
                     content: p.content,
                     createdAt: p.createdAt,
-                    likesCount: 0,
-                    commentsCount: 0,
+                    likesCount: p.likesCount,
+                    commentsCount: p.commentsCount,
                     isAdmin: p.isAdmin,
                     hasSubscription: p.hasSubscription,
+                    isLikedByMe: p.isLiked,
                 }));
                 console.log('[Forum] Loaded posts:', convertedPosts.length);
                 setPosts(convertedPosts);
@@ -44,7 +47,7 @@ export default function ForumPage() {
         };
 
         loadPosts();
-    }, [filters]);
+    }, [filters, user]); // Reload when user changes (login/logout) to update isLikedByMe
 
     const handleCreatePost = async (content: string, imageUrl?: string) => {
         if (!user) return;
@@ -66,11 +69,11 @@ export default function ForumPage() {
                     authorUsername: user.username,
                     content,
                     imageUrl,
-                    createdAt: new Date().toISOString(),
+                    createdAt: new Date().toISOString(), // This might still issue a local time, but backend will fix on refresh
                     likesCount: 0,
                     commentsCount: 0,
+                    isLikedByMe: false,
                 };
-                setPosts(prev => [newPost, ...prev]);
                 setPosts(prev => [newPost, ...prev]);
                 console.log('[Forum] Post added locally, ID:', result.postId);
                 toast.success('Публикация создана');
@@ -88,12 +91,73 @@ export default function ForumPage() {
         }
     };
 
-    const handleLike = (postId: number) => {
-        // Like API not implemented on backend yet
+    const handleLike = async (postId: number) => {
+        if (!user) return;
+        const token = localStorage.getItem('sylvaire_token');
+        if (!token) return;
+
+        // Optimistic update
+        setPosts(prev => prev.map(p => {
+            if (p.id === postId) {
+                return {
+                    ...p,
+                    isLikedByMe: !p.isLikedByMe,
+                    likesCount: p.isLikedByMe ? p.likesCount - 1 : p.likesCount + 1
+                };
+            }
+            return p;
+        }));
+
+        try {
+            await toggleLike(postId, token);
+        } catch (error) {
+            console.error('Failed to toggle like:', error);
+            // Revert on error
+            setPosts(prev => prev.map(p => {
+                if (p.id === postId) {
+                    return {
+                        ...p,
+                        isLikedByMe: !p.isLikedByMe,
+                        likesCount: p.isLikedByMe ? p.likesCount - 1 : p.likesCount + 1
+                    };
+                }
+                return p;
+            }));
+            toast.error('Не удалось поставить лайк');
+        }
     };
 
-    const handleComment = (postId: number, content: string) => {
-        // Comment API not implemented on backend yet
+    const handleComment = async (postId: number, content: string) => {
+        if (!user) return;
+        const token = localStorage.getItem('sylvaire_token');
+        if (!token) return;
+
+        try {
+            const result = await createComment(postId, content, token);
+            if (result.success) {
+                // Update specific post comment count locally
+                setPosts(prev => prev.map(p => {
+                    if (p.id === postId) {
+                        return {
+                            ...p,
+                            commentsCount: p.commentsCount + 1
+                        };
+                    }
+                    return p;
+                }));
+                // Note: PostCard handles displaying the new comment in its internal state usually,
+                // but updating the feed count is good practice.
+            } else {
+                if (result.error && result.error.includes("Вы заблокированы")) {
+                    toast.error(result.error);
+                } else {
+                    toast.error('Не удалось отправить комментарий');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to comment:', error);
+            toast.error('Ошибка соединения');
+        }
     };
 
     const handleDeletePost = async (postId: number) => {
