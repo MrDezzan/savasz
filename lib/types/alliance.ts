@@ -11,6 +11,7 @@ export interface Alliance {
     description: string;
     logoSvg: string;
     color: string;
+    bannerUrl?: string;
 
     // Leader info
     leaderUsername: string;

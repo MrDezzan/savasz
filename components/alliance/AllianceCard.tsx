@@ -20,7 +20,7 @@ export default function AllianceCard({ alliance }: AllianceCardProps) {
     const recruitment = getRecruitmentLabel();
 
     return (
-        <Link href={`/alliances/${alliance.id}`} className="alliance-card">
+        <Link href={`/alliances/${alliance.shortName}`} className="alliance-card">
             {/* Logo */}
             <div className="alliance-card-logo" style={{ borderColor: alliance.color }}>
                 {alliance.logoSvg ? (

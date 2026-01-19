@@ -251,6 +251,16 @@ export async function getAlliances(): Promise<AllianceData[]> {
     }
 }
 
+export async function getAlliance(shortName: string): Promise<AllianceData | null> {
+    try {
+        const data = await api<{ success: boolean; organization: AllianceData }>(`/api/orgs/${shortName}`);
+        return data.organization || null;
+    } catch (e) {
+        console.error(`[API] Failed to fetch alliance ${shortName}:`, e);
+        return null;
+    }
+}
+
 export async function createAlliance(
     shortName: string,
     fullName: string,
