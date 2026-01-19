@@ -200,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             refreshTags,
             canManageTags,
             isAdmin,
+            isBanned: userTags?.isBanned ?? false,
         }}>
             {children}
         </AuthContext.Provider>
