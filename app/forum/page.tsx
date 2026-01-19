@@ -6,6 +6,7 @@ import { PostCard, FeedSidebar, CreatePost } from '@/components/feed';
 import { useAuth } from '@/lib/auth-context';
 import { IconTrash } from '@/components/ui/icons';
 import { getFeed, createPost as createPostApi, FeedPost } from '@/lib/api';
+import { toast } from 'sonner';
 
 export default function ForumPage() {
     const { user, isAdmin } = useAuth();
@@ -70,12 +71,20 @@ export default function ForumPage() {
                     commentsCount: 0,
                 };
                 setPosts(prev => [newPost, ...prev]);
+                setPosts(prev => [newPost, ...prev]);
                 console.log('[Forum] Post added locally, ID:', result.postId);
+                toast.success('Публикация создана');
             } else {
                 console.error('[Forum] API returned error:', result.error);
+                if (result.error === "Banned users cannot post") {
+                    toast.error("Вы заблокированы и не можете писать сообщения");
+                } else {
+                    toast.error('Ошибка: ' + (result.error || 'Не удалось создать публикацию'));
+                }
             }
         } catch (error) {
             console.error('[Forum] Failed to create post:', error);
+            toast.error('Ошибка соединения с сервером');
         }
     };
 

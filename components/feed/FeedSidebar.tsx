@@ -78,7 +78,7 @@ export default function FeedSidebar({ filters, onFiltersChange }: FeedSidebarPro
             <div className="feed-sidebar-card feed-info-card">
                 <h3 className="feed-sidebar-title">Лента Sylvaire</h3>
                 <p className="feed-info-text">
-                    Публикации игроков и альянсов. Делитесь новостями,
+                    Публикации игроков. Делитесь новостями,
                     обсуждайте события и находите единомышленников.
                 </p>
             </div>

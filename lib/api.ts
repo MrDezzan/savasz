@@ -95,20 +95,16 @@ export interface PlayerProfile {
         expiresIn?: string;
         expiresAt?: string;
     }[];
-    organization?: Organization;
     hasSubscription?: boolean;
     subscriptionExpiry?: string;
     subscriptionExpires?: string;
+
+    isBanned?: boolean;
+    banReason?: string;
+    banExpires?: string;
 }
 
-export interface Organization {
-    id: number;
-    shortName: string;
-    fullName: string;
-    bannerUrl?: string;
-    creator: string;
-    createdAt?: string;
-}
+
 
 export async function getProfile(username: string): Promise<PlayerProfile | null> {
     try {
@@ -228,47 +224,4 @@ export async function checkTagManagementPermission(
     }
 }
 
-// Alliances/Organizations API
-export interface AllianceData {
-    id: number;
-    shortName: string;
-    fullName: string;
-    description?: string;
-    bannerUrl?: string;
-    leaderUsername: string;
-    createdBy: string;
-    memberCount?: number;
-    createdAt?: string;
-}
 
-export async function getAlliances(): Promise<AllianceData[]> {
-    try {
-        const data = await api<{ success: boolean; organizations: AllianceData[]; count: number }>('/api/orgs');
-        return data.organizations || [];
-    } catch (e) {
-        console.error('[API] Failed to fetch alliances:', e);
-        return [];
-    }
-}
-
-export async function getAlliance(shortName: string): Promise<AllianceData | null> {
-    try {
-        const data = await api<{ success: boolean; organization: AllianceData }>(`/api/orgs/${shortName}`);
-        return data.organization || null;
-    } catch (e) {
-        console.error(`[API] Failed to fetch alliance ${shortName}:`, e);
-        return null;
-    }
-}
-
-export async function createAlliance(
-    shortName: string,
-    fullName: string,
-    token: string
-): Promise<{ success: boolean; error?: string }> {
-    return api('/api/orgs', {
-        method: 'POST',
-        body: JSON.stringify({ shortName, fullName }),
-        token,
-    });
-}

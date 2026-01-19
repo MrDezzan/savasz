@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import {
     IconHome,
-    IconAlliance,
     IconBell,
     IconUser,
     IconTrophy,
@@ -33,7 +32,7 @@ export default function Sidebar() {
 
     const navItems: NavItem[] = [
         { href: '/forum', icon: IconComment, label: 'Форум' },
-        { href: '/alliances', icon: IconAlliance, label: 'Альянсы' },
+
         { href: '/forum/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
         { href: user ? `/profile/${user.username}` : '/login', icon: IconUser, label: 'Профиль' },
     ];
@@ -46,7 +45,7 @@ export default function Sidebar() {
     const isActive = (href: string) => {
         if (href === '/forum') return pathname === '/forum';
         if (href === '/forum/leaderboard') return pathname === '/forum/leaderboard';
-        if (href === '/alliances') return pathname.startsWith('/alliances');
+
         return pathname.startsWith(href);
     };
 

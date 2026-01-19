@@ -151,6 +151,35 @@ export default function ProfilePage() {
             <div className="container">
                 <Link href="/leaderboard" className="back-link">← Вернуться к лидерборду</Link>
 
+                {profile.isBanned && (
+                    <div className="ban-banner" style={{
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        color: '#fca5a5',
+                        padding: '24px',
+                        borderRadius: '16px',
+                        marginBottom: '32px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        backdropFilter: 'blur(8px)'
+                    }}>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span>🚫</span> АККАУНТ ЗАБЛОКИРОВАН
+                        </div>
+                        <div style={{ fontSize: '16px', opacity: 0.9, maxWidth: '600px', lineHeight: '1.6' }}>
+                            <div style={{ marginBottom: '4px' }}>
+                                <span style={{ color: '#9ca3af' }}>Причина:</span> <span style={{ color: 'white', fontWeight: 500 }}>{profile.banReason || 'Не указана'}</span>
+                            </div>
+                            <div>
+                                <span style={{ color: '#9ca3af' }}>Истекает:</span> <span style={{ color: '#fbbf24', fontWeight: 600 }}>{profile.banExpires || 'Неизвестно'}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="profile-container">
                     <div className="profile-left">
                         <div className="skin-card">
