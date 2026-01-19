@@ -13,6 +13,7 @@ interface UserTags {
     isModerator: boolean;
     hasSubscription: boolean;
     subscriptionExpires?: string;
+    isBanned?: boolean;
 }
 
 interface AuthContextType {
@@ -25,12 +26,14 @@ interface AuthContextType {
     refreshTags: () => Promise<void>;
     canManageTags: boolean;
     isAdmin: boolean;
+    isBanned: boolean;
 }
 
 const DEFAULT_TAGS: UserTags = {
     isAdmin: false,
     isModerator: false,
     hasSubscription: false,
+    isBanned: false,
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -93,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     isModerator: profile.tags?.some(t => t.name === 'Модератор') ?? false,
                     hasSubscription: profile.tags?.some(t => t.name === '+') ?? false,
                     subscriptionExpires: profile.subscriptionExpires,
+                    isBanned: profile.isBanned ?? false,
                 };
                 saveCachedTags(username, tags);
                 return tags;

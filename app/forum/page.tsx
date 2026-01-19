@@ -9,7 +9,7 @@ import { getFeed, createPost as createPostApi, deletePost, toggleLike, createCom
 import { toast } from 'sonner';
 
 export default function ForumPage() {
-    const { user, isAdmin } = useAuth();
+    const { user, isAdmin, userTags } = useAuth();
     const [posts, setPosts] = useState<Post[]>([]);
     const [filters, setFilters] = useState<FeedFilters>({
         sort: 'newest',
@@ -189,7 +189,28 @@ export default function ForumPage() {
 
                     {/* Create post (only for authenticated users) */}
                     {user && (
-                        <CreatePost onSubmit={handleCreatePost} />
+                        userTags?.isBanned ? (
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-8 backdrop-blur-sm">
+                                <div className="flex justify-center mb-4">
+                                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold text-red-500 mb-2">Доступ ограничен</h3>
+                                <p className="text-white/60 max-w-md mx-auto">
+                                    Ваш аккаунт заблокирован, поэтому вы не можете создавать новые публикации и оставлять комментарии.
+                                </p>
+                                {userTags.subscriptionExpires && (
+                                    <p className="text-white/40 text-sm mt-4">
+                                        Истекает: {userTags.subscriptionExpires}
+                                    </p>
+                                )}
+                            </div>
+                        ) : (
+                            <CreatePost onSubmit={handleCreatePost} />
+                        )
                     )}
 
                     {/* Posts */}
