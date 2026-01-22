@@ -36,7 +36,7 @@ export default function Footer() {
                 </div>
             </div>
             <div className="footer-bottom">
-                <p>© Sylvaire 2025. Мы никак не связаны с Microsoft, Mojang.</p>
+                <p>© Sylvaire 2026. Мы никак не связаны с Microsoft, Mojang.</p>
             </div>
         </footer>
     );

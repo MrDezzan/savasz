@@ -87,7 +87,7 @@ export default function HomePage() {
               Приватный сервер Minecraft, где фантазия становится реальностью.
               Присоединяйся к нашему уютному миру приключений, творчества и настоящего выживания.
             </p>
-            <p className="hero-version"><IconStar size={16} className="inline-icon" /> 1.21.8 · Java Edition</p>
+            <p className="hero-version"><IconStar size={16} className="inline-icon" /> 1.21.11 · Java Edition</p>
             <div className="hero-btns">
               <a href="https://dsc.gg/sylvaire" className="btn btn-primary">Начать приключение →</a>
               <a href="#features" className="btn btn-secondary">Подробнее</a>
@@ -228,7 +228,7 @@ export default function HomePage() {
               <h2 className="faq-title">Часто задаваемые <span className="accent">вопросы</span></h2>
               <div className="faq-list">
                 {[
-                  { q: "Какая версия у проекта?", a: "Проект установлен на версии 1.21.8. Можно заходить с версий 1.21.6 – 1.21.8!" },
+                  { q: "Какая версия у проекта?", a: "Проект установлен на версии 1.21.11. Можно заходить с версий 1.21.6 – 1.21.11!" },
                   { q: "На какой платформе можно зайти?", a: "Для игры необходимо заходить с платформы Java (ПК). Bedrock не поддерживается." },
                   { q: "Нужна ли лицензия?", a: "Нет, можно зайти как с пиратской, так и с лицензионной версии Minecraft." },
                   { q: "Как получить проходку?", a: "На донат-сайте или подать заявку в Discord. Проходка действует бессрочно!" },
