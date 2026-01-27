@@ -60,7 +60,7 @@ export default function ForumPage() {
 
         try {
             console.log('[Forum] Creating post with token:', token.substring(0, 20) + '...');
-            const result = await createPostApi(content, token);
+            const result = await createPostApi(content, token, imageUrl);
             console.log('[Forum] createPost response:', result);
             if (result.success && result.postId) {
                 // Add new post to the top

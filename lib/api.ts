@@ -170,10 +170,10 @@ export async function getFeed(page = 0, token?: string): Promise<{ posts: FeedPo
     return data;
 }
 
-export async function createPost(content: string, token: string): Promise<{ success: boolean; postId?: number; error?: string }> {
+export async function createPost(content: string, token: string, imageUrl?: string): Promise<{ success: boolean; postId?: number; error?: string }> {
     return api('/api/posts', {
         method: 'POST',
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, imageUrl }),
         token,
     });
 }
