@@ -65,6 +65,59 @@ export default function PostCard({ post, onLike, onComment, onDelete, showCommen
         return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     };
 
+    const renderContent = (content: string) => {
+        // Regex to match markdown images: ![alt](url)
+        const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+        const parts = [];
+        let lastIndex = 0;
+        let match;
+
+        while ((match = imageRegex.exec(content)) !== null) {
+            // Text before image
+            if (match.index > lastIndex) {
+                parts.push(content.slice(lastIndex, match.index));
+            }
+
+            // The image itself
+            const alt = match[1];
+            const src = match[2];
+            parts.push(
+                <div key={match.index} className="post-image-container my-2">
+                    <img src={src} alt={alt} className="rounded-lg max-h-96 object-contain" />
+                </div>
+            );
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        // Remaining text
+        if (lastIndex < content.length) {
+            parts.push(content.slice(lastIndex));
+        }
+
+        // If no images found, return content as lines
+        if (parts.length === 0) {
+            return content.split('\n').map((line, i) => (
+                <span key={i}>
+                    {line}
+                    <br />
+                </span>
+            ));
+        }
+
+        return parts.map((part, i) => {
+            if (typeof part === 'string') {
+                return part.split('\n').map((line, j) => (
+                    <span key={`${i}-${j}`}>
+                        {line}
+                        <br />
+                    </span>
+                ));
+            }
+            return part;
+        });
+    };
+
     return (
         <article className="post-card">
             {/* Header */}
@@ -144,8 +197,10 @@ export default function PostCard({ post, onLike, onComment, onDelete, showCommen
 
             {/* Content */}
             <div className="post-content">
-                <p>{post.content}</p>
-                {post.imageUrl && (
+                <div className="text-gray-100 whitespace-pre-wrap">
+                    {renderContent(post.content)}
+                </div>
+                {post.imageUrl && !post.content.includes(post.imageUrl) && (
                     <div className="post-image">
                         <img src={post.imageUrl} alt="" />
                     </div>
