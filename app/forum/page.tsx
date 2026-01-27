@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Post, FeedFilters } from '@/lib/types/feed';
+import { config } from '@/lib/config';
 import { PostCard, FeedSidebar, CreatePost } from '@/components/feed';
 import { useAuth } from '@/lib/auth-context';
 import { IconTrash } from '@/components/ui/icons';
-import { getFeed, createPost as createPostApi, deletePost, toggleLike, createComment, FeedPost } from '@/lib/api';
+import { getFeed, createPost as createPostApi, deletePost, toggleLike, createComment, FeedPost, uploadImage } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function ForumPage() {
@@ -60,7 +61,35 @@ export default function ForumPage() {
 
         try {
             console.log('[Forum] Creating post with token:', token.substring(0, 20) + '...');
-            const result = await createPostApi(content, token, imageUrl);
+            console.log('[Forum] Creating post with token:', token.substring(0, 20) + '...');
+
+            let finalContent = content;
+            let finalImageUrl = undefined; // Don't send base64 to createPostApi
+
+            if (imageUrl) {
+                try {
+                    // Convert base64 to blob to upload
+                    const res = await fetch(imageUrl);
+                    const blob = await res.blob();
+                    const file = new File([blob], "image.png", { type: blob.type });
+
+                    const uploadRes = await uploadImage(file, token);
+                    if (uploadRes.success && uploadRes.url) {
+                        // Check if content already has image markdown (unlikely)
+                        // Append image at the end
+                        finalContent += `\n\n![Image](${config.apiUrl}${uploadRes.url})`;
+                    } else {
+                        toast.error("Не удалось загрузить изображение: " + uploadRes.error);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Image upload error:", e);
+                    toast.error("Ошибка загрузки изображения");
+                    return;
+                }
+            }
+
+            const result = await createPostApi(finalContent, token, finalImageUrl);
             console.log('[Forum] createPost response:', result);
             if (result.success && result.postId) {
                 // Add new post to the top

@@ -286,3 +286,27 @@ export async function checkTagManagementPermission(
         return false;
     }
 }
+
+export async function uploadImage(file: File, token: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch(`${config.apiUrl}/api/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Upload failed');
+        }
+
+        return response.json();
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
+}
