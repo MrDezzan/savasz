@@ -22,9 +22,22 @@ export default function PostCard({ post, onLike, onComment, onDelete, showCommen
     const { isAdmin, user } = useAuth();
     const [isLiked, setIsLiked] = useState(post.isLikedByMe || false);
     const [likesCount, setLikesCount] = useState(post.likesCount);
-    // ... rest of state
+    const [showAllComments, setShowAllComments] = useState(false);
+    const [showCommentInput, setShowCommentInput] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
-    // ... useEffect ...
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleLike = () => {
         if (!user) {
