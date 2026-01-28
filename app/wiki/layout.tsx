@@ -1,4 +1,5 @@
 import Sidebar from "@/components/Sidebar";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function WikiLayout({
     children,
@@ -9,6 +10,7 @@ export default function WikiLayout({
         <div className="forum-layout">
             <Sidebar />
             <main className="forum-content">
+                <Breadcrumbs />
                 {children}
             </main>
         </div>

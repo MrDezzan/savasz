@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import Providers from "@/components/Providers";
+import MaintenanceGuard from "@/components/MaintenanceGuard";
 import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
@@ -27,9 +28,11 @@ export default function RootLayout({
     <html lang="ru">
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
+          <MaintenanceGuard>
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
+          </MaintenanceGuard>
           <Toaster position="top-right" richColors theme="dark" />
         </Providers>
       </body>

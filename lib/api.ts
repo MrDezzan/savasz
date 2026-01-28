@@ -311,3 +311,22 @@ export async function uploadImage(file: File, token: string): Promise<{ success:
         return { success: false, error: e.message };
     }
 }
+
+export interface MaintenanceStatus {
+    maintenance: boolean;
+    onlinePlayers: number;
+    maxPlayers: number;
+}
+
+export async function getMaintenanceStatus(): Promise<MaintenanceStatus> {
+    try {
+        const data = await api<{
+            maintenance: boolean;
+            onlinePlayers: number;
+            maxPlayers: number;
+        }>('/api/status');
+        return data;
+    } catch (e) {
+        return { maintenance: false, onlinePlayers: 0, maxPlayers: 0 };
+    }
+}
