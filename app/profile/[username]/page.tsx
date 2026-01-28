@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { getProfile, PlayerProfile, updateDescription, updateUserTags, TagUpdate } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import SkinViewer from '@/components/SkinViewer';
-import Breadcrumbs from '@/components/Breadcrumbs';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
@@ -150,9 +149,7 @@ export default function ProfilePage() {
     return (
         <section className="profile-page">
             <div className="container">
-                <div style={{ marginBottom: '24px' }}>
-                    <Breadcrumbs />
-                </div>
+                <Link href="/leaderboard" className="back-link">← Вернуться к лидерборду</Link>
 
                 {profile.isBanned && (
                     <div className="ban-banner" style={{

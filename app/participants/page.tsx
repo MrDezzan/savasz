@@ -126,37 +126,42 @@ export default function ParticipantsPage() {
 
                 .search-wrapper {
                     position: relative;
-                }
-
-                .search-icon {
-                    position: absolute;
-                    left: 16px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    color: #64748b;
-                    transition: color 0.2s;
-                }
-
-                .search-input {
-                    width: 100%;
-                    padding: 14px 14px 14px 48px;
+                    display: flex;
+                    align-items: center;
                     background: rgba(30, 41, 59, 0.4);
                     border: 1px solid rgba(148, 163, 184, 0.1);
                     border-radius: 16px;
-                    color: white;
-                    font-size: 15px;
+                    padding: 0 16px;
                     transition: all 0.2s;
                 }
 
-                .search-input:focus {
-                    outline: none;
+                .search-wrapper:focus-within {
                     background: rgba(30, 41, 59, 0.6);
                     border-color: rgba(99, 102, 241, 0.5);
                     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
                 }
 
-                .search-input:focus + .search-icon {
+                .search-icon {
+                    color: #64748b;
+                    transition: color 0.2s;
+                    flex-shrink: 0;
+                }
+
+                .search-wrapper:focus-within .search-icon {
                     color: #818cf8;
+                }
+
+                .search-input {
+                    width: 100%;
+                    padding: 14px 0 14px 12px;
+                    background: transparent;
+                    border: none;
+                    color: white;
+                    font-size: 15px;
+                }
+
+                .search-input:focus {
+                    outline: none;
                 }
 
                 .participants-grid {

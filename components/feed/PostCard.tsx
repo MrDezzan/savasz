@@ -16,28 +16,21 @@ interface PostCardProps {
     showComments?: boolean;
 }
 
+import { toast } from 'sonner';
+
 export default function PostCard({ post, onLike, onComment, onDelete, showComments = true }: PostCardProps) {
-    const { isAdmin } = useAuth();
+    const { isAdmin, user } = useAuth();
     const [isLiked, setIsLiked] = useState(post.isLikedByMe || false);
     const [likesCount, setLikesCount] = useState(post.likesCount);
-    const [showAllComments, setShowAllComments] = useState(false);
-    const [showCommentInput, setShowCommentInput] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
+    // ... rest of state
 
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setShowMenu(false);
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
+    // ... useEffect ...
 
     const handleLike = () => {
+        if (!user) {
+            toast.error('Войдите в аккаунт, чтобы оценить');
+            return;
+        }
         if (onLike) {
             onLike(post.id);
         }
