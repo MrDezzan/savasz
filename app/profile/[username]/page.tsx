@@ -348,85 +348,70 @@ export default function ProfilePage() {
                                     style={{
                                         marginTop: '24px',
                                         width: '100%',
-                                        border: 'none',
+                                        background: 'rgba(88, 101, 242, 0.1)',
+                                        border: '1px solid rgba(88, 101, 242, 0.2)',
+                                        borderRadius: '12px',
+                                        padding: '12px',
+                                        color: '#5865F2',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
                                         cursor: 'pointer',
                                         position: 'relative',
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        transition: 'all 0.2s ease'
                                     }}
                                     title="Нажмите, чтобы скопировать"
                                 >
                                     <div className="discord-content">
-                                        <svg className="discord-icon" viewBox="0 0 24 24">
+                                        <svg className="discord-icon" style={{ width: '20px', height: '20px', fill: 'currentColor' }} viewBox="0 0 24 24">
                                             <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.1.1 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.1 16.1 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02" />
                                         </svg>
                                         <span>{profile.discordUsername || 'Discord'}</span>
                                     </div>
                                     <div className="discord-copied-overlay">
-                                        <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                                            <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
-                                            <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                                        <svg className="checkmark" style={{ width: '20px', height: '20px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                         <span>Скопировано</span>
                                     </div>
                                     <style jsx>{`
-                                        .discord-content {
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 12px;
-                                            transition: opacity 0.3s ease;
+                                        button:hover {
+                                            background: rgba(88, 101, 242, 0.2) !important;
+                                            transform: translateY(-2px);
                                         }
+                                        button.copied {
+                                            background: rgba(34, 197, 94, 0.1) !important;
+                                            border-color: rgba(34, 197, 94, 0.2) !important;
+                                            color: #22c55e !important;
+                                            transform: none !important;
+                                        }
+
+                                        .discord-content,
                                         .discord-copied-overlay {
-                                            position: absolute;
-                                            top: 0;
-                                            left: 0;
-                                            right: 0;
-                                            bottom: 0;
                                             display: flex;
                                             align-items: center;
                                             justify-content: center;
                                             gap: 8px;
-                                            background: #5865F2;
+                                            width: 100%;
+                                            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                                        }
+
+                                        .discord-copied-overlay {
+                                            position: absolute;
+                                            top: 50%;
+                                            left: 50%;
+                                            transform: translate(-50%, -50%) scale(0.5);
                                             opacity: 0;
-                                            transform: translateY(100%);
-                                            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                                         }
-                                        button.copied .discord-copied-overlay {
-                                            opacity: 1;
-                                            transform: translateY(0);
-                                        }
+
                                         button.copied .discord-content {
                                             opacity: 0;
-                                            transform: scale(0.9);
+                                            transform: scale(0.5);
                                         }
-                                        
-                                        .checkmark {
-                                            width: 24px;
-                                            height: 24px;
-                                            border-radius: 50%;
-                                            display: block;
-                                            stroke-width: 2;
-                                            stroke: #fff;
-                                            stroke-miterlimit: 10;
-                                            box-shadow: inset 0px 0px 0px #fff;
-                                            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
-                                        }
-                                        .checkmark-circle {
-                                            stroke-dasharray: 166;
-                                            stroke-dashoffset: 166;
-                                            stroke-width: 2;
-                                            stroke-miterlimit: 10;
-                                            stroke: #fff;
-                                            fill: none;
-                                            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
-                                        }
-                                        .checkmark-check {
-                                            transform-origin: 50% 50%;
-                                            stroke-dasharray: 48;
-                                            stroke-dashoffset: 48;
-                                            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
-                                        }
-                                        @keyframes stroke {
-                                            100% { stroke-dashoffset: 0; }
+
+                                        button.copied .discord-copied-overlay {
+                                            opacity: 1;
+                                            transform: translate(-50%, -50%) scale(1);
                                         }
                                     `}</style>
                                 </button>

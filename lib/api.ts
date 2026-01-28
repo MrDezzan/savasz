@@ -135,6 +135,7 @@ export interface LeaderboardEntry {
     formattedPlaytime: string;
     joinCount: number;
     isOnline: boolean;
+    discordUsername?: string;
 }
 
 export async function getLeaderboard(period: LeaderboardPeriod = 'ALL_TIME'): Promise<LeaderboardEntry[]> {

@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 // Pages that should show external navigation (Navbar + Footer)
-const EXTERNAL_ROUTES = ['/', '/leaderboard', '/login', '/wiki', '/map'];
+const EXTERNAL_ROUTES = ['/', '/leaderboard', '/login'];
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
