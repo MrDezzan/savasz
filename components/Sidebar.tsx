@@ -14,6 +14,9 @@ import {
     IconAlert,
     IconLogs,
     IconComment,
+    IconUsers,
+    IconMap,
+    IconBook
 } from '@/components/ui/icons';
 
 interface NavItem {
@@ -32,8 +35,10 @@ export default function Sidebar() {
 
     const navItems: NavItem[] = [
         { href: '/forum', icon: IconComment, label: 'Форум' },
-
+        { href: '/participants', icon: IconUsers, label: 'Участники' },
         { href: '/forum/leaderboard', icon: IconTrophy, label: 'Рейтинг' },
+        { href: '/map', icon: IconMap, label: 'Карта' },
+        { href: '/wiki', icon: IconBook, label: 'Википедия' },
         { href: user ? `/profile/${user.username}` : '/login', icon: IconUser, label: 'Профиль' },
     ];
 
@@ -45,6 +50,8 @@ export default function Sidebar() {
     const isActive = (href: string) => {
         if (href === '/forum') return pathname === '/forum';
         if (href === '/forum/leaderboard') return pathname === '/forum/leaderboard';
+        if (href === '/map') return pathname === '/map';
+        if (href === '/wiki') return pathname.startsWith('/wiki');
 
         return pathname.startsWith(href);
     };

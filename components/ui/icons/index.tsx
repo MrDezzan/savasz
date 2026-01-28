@@ -328,6 +328,23 @@ export const IconShoppingBag: React.FC<IconProps> = ({ size = 24, className, str
     </svg>
 );
 
+// Map Icon
+export const IconMap: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+        <line x1="8" y1="2" x2="8" y2="18"></line>
+        <line x1="16" y1="6" x2="16" y2="22"></line>
+    </svg>
+);
+
+// Book Icon
+export const IconBook: React.FC<IconProps> = ({ size = 24, className, strokeWidth = 2 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+    </svg>
+);
+
 // Export all icons
 export const Icons = {
     Home: IconHome,
@@ -368,6 +385,8 @@ export const Icons = {
     Star: IconStar,
     Pickaxe: IconPickaxe,
     ShoppingBag: IconShoppingBag,
+    Map: IconMap,
+    Book: IconBook,
 };
 
 export default Icons;
